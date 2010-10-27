@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.oozie.BaseEngineException;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.client.OozieClient;
-import org.apache.oozie.client.XOozieClient;
 import org.apache.oozie.client.rest.JsonBean;
 import org.apache.oozie.client.rest.RestConstants;
 import org.apache.oozie.service.AuthorizationException;
@@ -160,7 +159,7 @@ public abstract class BaseJobServlet extends JsonRestServlet {
             String wfPath = conf.get(OozieClient.APP_PATH);
             String coordPath = conf.get(OozieClient.COORDINATOR_APP_PATH);
             if (wfPath == null && coordPath == null) {
-                String libPath = conf.get(XOozieClient.LIBPATH);
+                String libPath = conf.get(OozieClient.LIBPATH);
                 conf.set(OozieClient.APP_PATH, libPath);
                 wfPath = libPath;
             }
