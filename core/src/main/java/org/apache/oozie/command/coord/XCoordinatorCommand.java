@@ -23,8 +23,9 @@ public abstract class XCoordinatorCommand<T> extends XCommand<T> {
      * @param priority
      * @param dryrun
      */
+    /*
     public XCoordinatorCommand(String name, String type, int priority, boolean dryrun) {
         super(name, type, priority, dryrun);
     }
-
+    */
 }
