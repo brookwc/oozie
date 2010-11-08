@@ -20,7 +20,7 @@ public class XCoordActionInfoCommand extends XCoordinatorCommand<CoordinatorActi
     public XCoordActionInfoCommand(String id) {
         super("action.info", "action.info", 1);
         this.id = ParamChecker.notEmpty(id, "id");
-        getLog().debug("Command for coordinator action " + id);
+        LOG.debug("Command for coordinator action " + id);
     }
 
     /* (non-Javadoc)
@@ -34,7 +34,7 @@ public class XCoordActionInfoCommand extends XCoordinatorCommand<CoordinatorActi
             return action;
         }
         else {
-            getLog().error(ErrorCode.E0610);
+            LOG.error(ErrorCode.E0610);
             return null;
         }
     }
@@ -63,17 +63,11 @@ public class XCoordActionInfoCommand extends XCoordinatorCommand<CoordinatorActi
 
     }
 
-    /**
-     * Return the {link XLog} instance used by the command.
-     * <p/>
-     * The log instance belongs to the {link XCoordinatorCommand}.
-     * <p/>
-     * Subclasses should override this method if the want to use a different log instance.
-     * 
-     * @return the log instance.
+    /* (non-Javadoc)
+     * @see org.apache.oozie.command.XCommand#isLockRequired()
      */
     @Override
-    protected XLog getLog() {
-        return LOG;
+    protected boolean isLockRequired() {
+        return false;
     }
 }
