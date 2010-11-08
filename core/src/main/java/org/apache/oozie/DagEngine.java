@@ -38,6 +38,7 @@ import org.apache.oozie.command.wf.SuspendCommand;
 import org.apache.oozie.command.wf.DefinitionCommand;
 import org.apache.oozie.command.wf.ExternalIdCommand;
 import org.apache.oozie.command.wf.WorkflowActionInfoCommand;
+import org.apache.oozie.command.wf.XWorkflowActionInfoCommand;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.service.CallableQueueService;
 import org.apache.oozie.util.ParamChecker;
@@ -473,7 +474,7 @@ public class DagEngine extends BaseEngine {
 
     public WorkflowActionBean getWorkflowAction(String actionId) throws BaseEngineException {
         try {
-            return new WorkflowActionInfoCommand(actionId).call();
+            return new XWorkflowActionInfoCommand(actionId).call();
         }
         catch (CommandException ex) {
             throw new BaseEngineException(ex);
