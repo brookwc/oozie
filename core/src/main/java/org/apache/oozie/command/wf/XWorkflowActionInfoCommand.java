@@ -34,7 +34,7 @@ public class XWorkflowActionInfoCommand extends XWorkflowCommand<WorkflowActionB
     public XWorkflowActionInfoCommand(String id) {
         super("action.info", "action.info", 1);
         this.id = ParamChecker.notEmpty(id, "id");
-        getLog().debug("Command for workflow action " + id);
+        LOG.debug("Command for workflow action " + id);
     }
 
     @Override
@@ -45,17 +45,9 @@ public class XWorkflowActionInfoCommand extends XWorkflowCommand<WorkflowActionB
             return action;
         }
         else {
-            getLog().error(ErrorCode.E0610);
+            LOG.error(ErrorCode.E0610);
             return null;
         }
-    }
- 
-    /* (non-Javadoc)
-     * @see org.apache.oozie.command.XCommand#getLog()
-     */
-    @Override
-    protected XLog getLog() {
-        return LOG;
     }
 
     /* (non-Javadoc)
@@ -81,5 +73,10 @@ public class XWorkflowActionInfoCommand extends XWorkflowCommand<WorkflowActionB
     protected void verifyPrecondition() throws CommandException {
         
     }
-    
+
+    @Override
+    protected boolean isLockRequired() {
+        return false;
+    }
+
 }
