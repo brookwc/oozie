@@ -216,7 +216,7 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
     @Override
     protected Void execute() throws CommandException {
         try {
-            setLogInfo(this.coordJob);
+            //setLogInfo(this.coordJob);
 
             check(this.coordJob, newEndTime, newConcurrency, newPauseTime);
 
@@ -235,14 +235,14 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
                 this.coordJob.setPauseTime(newPauseTime);
             }
 
-            incrJobCounter(1);
+            //incrJobCounter(1);
 
             JPAService jpaServiceCoordUpdate = Services.get().get(JPAService.class);
             if (jpaServiceCoordUpdate != null) {
                 jpaServiceCoordUpdate.execute(new CoordinatorUpdateJobCommand(this.coordJob));
             }
             else {
-                getLog().error(ErrorCode.E0610);
+                LOG.error(ErrorCode.E0610);
                 return null;
             }
 
@@ -281,7 +281,7 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
                 check(this.coordJob, newEndTime, newConcurrency, newPauseTime);
             }
             else {
-                getLog().error(ErrorCode.E0610);
+                LOG.error(ErrorCode.E0610);
             }
         }
         catch (XException ex) {
@@ -289,17 +289,8 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
         }
     }
 
-    /**
-     * Return the {link XLog} instance used by the command.
-     * <p/>
-     * The log instance belongs to the {link XCoordChangeCommand}.
-     * <p/>
-     * Subclasses should override this method if the want to use a different log instance.
-     * 
-     * @return the log instance.
-     */
     @Override
-    protected XLog getLog() {
-        return LOG;
+    protected boolean isLockRequired() {
+        return true;
     }
 }
