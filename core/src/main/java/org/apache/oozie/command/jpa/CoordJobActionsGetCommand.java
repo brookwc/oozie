@@ -14,6 +14,7 @@
  */
 package org.apache.oozie.command.jpa;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -25,43 +26,40 @@ import org.apache.oozie.command.CommandException;
 import org.apache.oozie.util.ParamChecker;
 
 /**
- * Load the CoordinatorAction into a Bean and return it.
+ * Load the CoordinatorJob into a Bean and return it.
  */
-public class CoordinatorActionGetCommand implements JPACommand<CoordinatorActionBean> {
+public class CoordJobActionsGetCommand implements JPACommand<List<CoordinatorActionBean>> {
 
-    private String coordActionId = null;
+    private String coordJobId = null;
 
-    public CoordinatorActionGetCommand(String coordActionId) {
-        ParamChecker.notNull(coordActionId, "coordActionId");
-        this.coordActionId = coordActionId;
+    public CoordJobActionsGetCommand(String coordJobId) {
+        ParamChecker.notNull(coordJobId, "coordJobId");
+        this.coordJobId = coordJobId;
     }
 
     @Override
     public String getName() {
-        return "CoordinatorActionGetCommand";
+        return "CoordJobActionsGetCommand";
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CoordinatorActionBean execute(EntityManager em) throws CommandException {
-        List<CoordinatorActionBean> caBeans;
+    public List<CoordinatorActionBean> execute(EntityManager em) throws CommandException {
+        List<CoordinatorActionBean> actionBeans = new ArrayList<CoordinatorActionBean>();
         try {
-            Query q = em.createNamedQuery("GET_COORD_ACTION");
-            q.setParameter("id", coordActionId);
-            caBeans = q.getResultList();
+            Query q = em.createNamedQuery("GET_ACTIONS_FOR_COORD_JOB");
+            q.setParameter("id", coordJobId);
+            List<CoordinatorActionBean> actions = q.getResultList();
+            for (CoordinatorActionBean a : actions) {
+                CoordinatorActionBean aa = getBeanForRunningCoordAction(a);
+                actionBeans.add(aa);
+            }
+            
+            return actionBeans;
         }
         catch (Exception e) {
             throw new CommandException(ErrorCode.E0603, e);
-        }
-        CoordinatorActionBean bean = null;
-        if (caBeans != null && caBeans.size() > 0) {
-            bean = caBeans.get(0);
-            bean = getBeanForRunningCoordAction(bean);
-            return bean;
-        }
-        else {
-            throw new CommandException(ErrorCode.E0605, coordActionId);
-        }
+        }        
     }
 
     private CoordinatorActionBean getBeanForRunningCoordAction(CoordinatorActionBean a) {
@@ -72,6 +70,8 @@ public class CoordinatorActionGetCommand implements JPACommand<CoordinatorAction
             action.setActionXml(a.getActionXml());
             action.setConsoleUrl(a.getConsoleUrl());
             action.setCreatedConf(a.getCreatedConf());
+            //action.setErrorCode(a.getErrorCode());
+            //action.setErrorMessage(a.getErrorMessage());
             action.setExternalStatus(a.getExternalStatus());
             action.setMissingDependencies(a.getMissingDependencies());
             action.setRunConf(a.getRunConf());

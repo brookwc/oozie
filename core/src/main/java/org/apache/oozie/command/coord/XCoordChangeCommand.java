@@ -10,8 +10,8 @@ import org.apache.oozie.XException;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.OozieClient;
 import org.apache.oozie.command.CommandException;
-import org.apache.oozie.command.jpa.CoordinatorJobGetCommand;
-import org.apache.oozie.command.jpa.CoordinatorUpdateJobCommand;
+import org.apache.oozie.command.jpa.CoordJobGetCommand;
+import org.apache.oozie.command.jpa.CoordJobUpdateCommand;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.util.DateUtils;
@@ -239,7 +239,7 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
 
             JPAService jpaServiceCoordUpdate = Services.get().get(JPAService.class);
             if (jpaServiceCoordUpdate != null) {
-                jpaServiceCoordUpdate.execute(new CoordinatorUpdateJobCommand(this.coordJob));
+                jpaServiceCoordUpdate.execute(new CoordJobUpdateCommand(coordJob));
             }
             else {
                 LOG.error(ErrorCode.E0610);
@@ -277,7 +277,7 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
             JPAService jpaService = Services.get().get(JPAService.class);
 
             if (jpaService != null) {
-                this.coordJob = jpaService.execute(new CoordinatorJobGetCommand(jobId));
+                this.coordJob = jpaService.execute(new CoordJobGetCommand(jobId));
                 check(this.coordJob, newEndTime, newConcurrency, newPauseTime);
             }
             else {

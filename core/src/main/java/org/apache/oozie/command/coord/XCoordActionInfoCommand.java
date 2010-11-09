@@ -3,7 +3,7 @@ package org.apache.oozie.command.coord;
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.command.CommandException;
-import org.apache.oozie.command.jpa.CoordinatorActionGetCommand;
+import org.apache.oozie.command.jpa.CoordActionGetCommand;
 import org.apache.oozie.util.ParamChecker;
 import org.apache.oozie.util.XLog;
 import org.apache.oozie.service.JPAService;
@@ -30,7 +30,7 @@ public class XCoordActionInfoCommand extends XCoordinatorCommand<CoordinatorActi
     protected CoordinatorActionBean execute() throws CommandException {
         JPAService jpaService = Services.get().get(JPAService.class);
         if (jpaService != null) {
-            CoordinatorActionBean action = jpaService.execute(new CoordinatorActionGetCommand(this.id));
+            CoordinatorActionBean action = jpaService.execute(new CoordActionGetCommand(this.id));
             return action;
         }
         else {

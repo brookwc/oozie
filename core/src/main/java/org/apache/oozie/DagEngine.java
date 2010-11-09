@@ -29,7 +29,7 @@ import org.apache.oozie.command.wf.JobsCommand;
 import org.apache.oozie.command.wf.KillCommand;
 import org.apache.oozie.command.wf.ReRunCommand;
 import org.apache.oozie.command.wf.ResumeCommand;
-import org.apache.oozie.command.wf.SubmitCommand;
+import org.apache.oozie.command.wf.XSubmitCommand;
 import org.apache.oozie.command.wf.SubmitHttpCommand;
 import org.apache.oozie.command.wf.SubmitPigCommand;
 import org.apache.oozie.command.wf.SubmitMRCommand;
@@ -91,7 +91,7 @@ public class DagEngine extends BaseEngine {
     @Override
     public String submitJob(Configuration conf, boolean startJob) throws DagEngineException {
         validateSubmitConfiguration(conf);
-        SubmitCommand submit = new SubmitCommand(conf, getAuthToken());
+        XSubmitCommand submit = new XSubmitCommand(conf, getAuthToken());
         try {
             String jobId = submit.call();
             if (startJob) {

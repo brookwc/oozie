@@ -12,14 +12,14 @@ import org.apache.oozie.util.ParamChecker;
 /**
  * Update the CoordinatorJob into a Bean and persist it.
  */
-public class CoordinatorUpdateJobCommand implements JPACommand<Void> {
+public class CoordJobUpdateCommand implements JPACommand<Void> {
 
     private CoordinatorJobBean coordJob = null;
 
     /**
      * @param coordJob
      */
-    public CoordinatorUpdateJobCommand(CoordinatorJobBean coordJob) {
+    public CoordJobUpdateCommand(CoordinatorJobBean coordJob) {
         ParamChecker.notNull(coordJob, "CoordinatorJobBean");
         this.coordJob = coordJob;
     }

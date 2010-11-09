@@ -17,6 +17,7 @@ package org.apache.oozie.command.wf;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.WorkflowJobBean;
 import org.apache.oozie.ErrorCode;
+import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.WorkflowStoreService;
 import org.apache.oozie.service.WorkflowAppService;
 import org.apache.oozie.service.Services;
@@ -26,8 +27,8 @@ import org.apache.oozie.util.ParamChecker;
 import org.apache.oozie.util.XConfiguration;
 import org.apache.oozie.util.XmlUtils;
 import org.apache.oozie.command.CommandException;
+import org.apache.oozie.command.jpa.WorkflowJobInsertCommand;
 import org.apache.oozie.store.StoreException;
-import org.apache.oozie.store.WorkflowStore;
 import org.apache.oozie.workflow.WorkflowApp;
 import org.apache.oozie.workflow.WorkflowException;
 import org.apache.oozie.workflow.WorkflowInstance;
@@ -45,6 +46,8 @@ import java.util.Set;
 import java.util.HashSet;
 
 public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
+    private static XLog LOG = XLog.getLog(XSubmitHttpCommand.class);
+    
     protected static final Set<String> MANDATORY_OOZIE_CONFS = new HashSet<String>();
     protected static final Set<String> OPTIONAL_OOZIE_CONFS = new HashSet<String>();
 
@@ -95,13 +98,13 @@ public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
      */
     @Override
     protected String execute() throws CommandException {
-        incrJobCounter(1);
+        //incrJobCounter(1);
         WorkflowAppService wps = Services.get().get(WorkflowAppService.class);
         try {
             XLog.Info.get().setParameter(DagXLogInfoService.TOKEN, conf.get(OozieClient.LOG_TOKEN));
             String wfXml = getWorkflowXml(conf);
-            XLog.getLog(getClass()).debug("workflow xml created on the server side is :\n");
-            XLog.getLog(getClass()).debug(wfXml);
+            LOG.debug("workflow xml created on the server side is :\n");
+            LOG.debug(wfXml);
             WorkflowApp app = wps.parseDef(wfXml);
             XConfiguration protoActionConf = wps.createProtoActionConf(conf, authToken, false);
             WorkflowLib workflowLib = Services.get().get(WorkflowStoreService.class).getWorkflowLibWithNoDB();
@@ -143,8 +146,16 @@ public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
             workflow.setWorkflowInstance(wfInstance);
             workflow.setExternalId(conf.get(OozieClient.EXTERNAL_ID));
 
-            setLogInfo(workflow);
-            store.insertWorkflow(workflow);
+            //setLogInfo(workflow);
+            //store.insertWorkflow(workflow);
+            JPAService jpaService = Services.get().get(JPAService.class);
+            if (jpaService != null) {
+                jpaService.execute(new WorkflowJobInsertCommand(workflow));
+            }
+            else {
+                LOG.error(ErrorCode.E0610);
+                return null;
+            }
 
             return workflow.getId();
         }
