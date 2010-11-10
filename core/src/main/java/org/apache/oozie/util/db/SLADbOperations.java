@@ -210,6 +210,25 @@ public class SLADbOperations {
                 .getStore(SLAStore.class, store);
         slaStore.insertSLAEvent(sla);
     }
+    
+    public static void writeSlaStatusEvent(String id, Status status, SlaAppType appType, XLog log) throws Exception {
+        SLAEventBean sla = new SLAEventBean();
+        sla.setSlaId(id);
+        sla.setJobStatus(status);
+        sla.setAppType(appType);
+        sla.setStatusTimestamp(new Date());
+        // System.out.println("Writing STATUS AAAAA " + id);
+        //SLAStore slaStore = (SLAStore) Services.get().get(StoreService.class).getStore(SLAStore.class, store);
+        //slaStore.insertSLAEvent(sla);
+        
+        JPAService jpaService = Services.get().get(JPAService.class);
+        if (jpaService != null) {
+            jpaService.execute(new SLAEventInsertCommand(sla));
+        }
+        else {
+            log.error(ErrorCode.E0610);
+        }
+    }
 
     public static void writeStausEvent(String slaXml, String id, Store store,
                                        Status stat, SlaAppType appType) throws CommandException {
@@ -218,6 +237,19 @@ public class SLADbOperations {
         }
         try {
             writeSlaStatusEvent(id, stat, store, appType);
+        }
+        catch (Exception e) {
+            throw new CommandException(ErrorCode.E1007, " id " + id, e);
+        }
+    }
+    
+    public static void writeStausEvent(String slaXml, String id, Status stat, SlaAppType appType, XLog log)
+            throws CommandException {
+        if (slaXml == null || slaXml.length() == 0) {
+            return;
+        }
+        try {
+            writeSlaStatusEvent(id, stat, appType, log);
         }
         catch (Exception e) {
             throw new CommandException(ErrorCode.E1007, " id " + id, e);
