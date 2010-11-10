@@ -7,13 +7,13 @@ import org.apache.oozie.command.XCommand;
  * 
  * @param <T>
  */
-public abstract class XCoordinatorCommand<T> extends XCommand<T> {
+public abstract class CoordinatorXCommand<T> extends XCommand<T> {
     /**
      * @param name
      * @param type
      * @param priority
      */
-    public XCoordinatorCommand(String name, String type, int priority) {
+    public CoordinatorXCommand(String name, String type, int priority) {
         super(name, type, priority);
     }
 

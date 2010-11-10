@@ -18,13 +18,13 @@ import org.apache.oozie.util.DateUtils;
 import org.apache.oozie.util.ParamChecker;
 import org.apache.oozie.util.XLog;
 
-public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
+public class CoordChangeXCommand extends CoordinatorXCommand<Void> {
     private String jobId;
     private Date newEndTime = null;
     private Integer newConcurrency = null;
     private Date newPauseTime = null;
     private boolean resetPauseTime = false;
-    private final XLog LOG = XLog.getLog(XCoordChangeCommand.class);
+    private final XLog LOG = XLog.getLog(CoordChangeXCommand.class);
     private String changeValue;
     private CoordinatorJobBean coordJob;
 
@@ -34,7 +34,7 @@ public class XCoordChangeCommand extends XCoordinatorCommand<Void> {
      * @param id
      * @param changeValue
      */
-    public XCoordChangeCommand(String id, String changeValue) {
+    public CoordChangeXCommand(String id, String changeValue) {
         super("coord_change", "coord_change", 0);
         this.jobId = ParamChecker.notEmpty(id, "id");
         ParamChecker.notEmpty(changeValue, "value");

@@ -81,7 +81,7 @@ import org.xml.sax.SAXException;
  * configurations. 2. Insert all datasets definition as part of the <data-in> and <data-out> tags. 3. Validate the XML
  * at runtime.
  */
-public class XCoordSubmitCommand extends XCoordinatorCommand<String> {
+public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
 
     private Configuration conf;
     private String authToken;
@@ -124,13 +124,13 @@ public class XCoordSubmitCommand extends XCoordinatorCommand<String> {
      * @param conf : Configuration for Coordinator job
      * @param authToken : To be used for authentication
      */
-    public XCoordSubmitCommand(Configuration conf, String authToken) {
+    public CoordSubmitXCommand(Configuration conf, String authToken) {
         super("coord_submit", "coord_submit", 1);
         this.conf = ParamChecker.notNull(conf, "conf");
         this.authToken = ParamChecker.notEmpty(authToken, "authToken");
     }
 
-    public XCoordSubmitCommand(boolean dryrun, Configuration conf, String authToken) {
+    public CoordSubmitXCommand(boolean dryrun, Configuration conf, String authToken) {
         //super("coord_submit", "coord_submit", 1, XLog.STD, dryrun);
         super("coord_submit", "coord_submit", 1);
         this.conf = ParamChecker.notNull(conf, "conf");
@@ -866,7 +866,7 @@ public class XCoordSubmitCommand extends XCoordinatorCommand<String> {
         // System.out.println("appXml :"+ appXml + "\n conf :"+ conf);
         new Services().init();
         try {
-            XCoordSubmitCommand sc = new XCoordSubmitCommand(conf, "TESTING");
+            CoordSubmitXCommand sc = new CoordSubmitXCommand(conf, "TESTING");
             String jobId = sc.call();
             System.out.println("Job Id " + jobId);
             Thread.sleep(80000);

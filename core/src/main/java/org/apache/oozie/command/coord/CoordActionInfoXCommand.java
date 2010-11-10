@@ -9,15 +9,15 @@ import org.apache.oozie.util.XLog;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 
-public class XCoordActionInfoCommand extends XCoordinatorCommand<CoordinatorActionBean> {
+public class CoordActionInfoXCommand extends CoordinatorXCommand<CoordinatorActionBean> {
 
     private String id;
-    private static XLog LOG = XLog.getLog(XCoordActionInfoCommand.class);
+    private static XLog LOG = XLog.getLog(CoordActionInfoXCommand.class);
 
     /**
      * @param id
      */
-    public XCoordActionInfoCommand(String id) {
+    public CoordActionInfoXCommand(String id) {
         super("action.info", "action.info", 1);
         this.id = ParamChecker.notEmpty(id, "id");
         LOG.debug("Command for coordinator action " + id);

@@ -41,7 +41,7 @@ import org.jdom.JDOMException;
 import java.io.IOException;
 import java.io.StringReader;
 
-public class XCoordActionStartCommand extends XCoordinatorCommand<Void> {
+public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
 
     public static final String EL_ERROR = "EL_ERROR";
     public static final String EL_EVAL_ERROR = "EL_EVAL_ERROR";
@@ -55,7 +55,7 @@ public class XCoordActionStartCommand extends XCoordinatorCommand<Void> {
     private String authToken = null;
     private CoordinatorActionBean coordAction = null;
 
-    public XCoordActionStartCommand(String id, String user, String token) {
+    public CoordActionStartXCommand(String id, String user, String token) {
         //super("coord_action_start", "coord_action_start", 1, XLog.OPS);
         super("coord_action_start", "coord_action_start", 1);
         this.actionId = ParamChecker.notEmpty(id, "id");
@@ -206,7 +206,7 @@ public class XCoordActionStartCommand extends XCoordinatorCommand<Void> {
                     else {
                         log.error(ErrorCode.E0610);
                     }
-                    queue(new XCoordActionReadyCommand(coordAction.getJobId()));
+                    queue(new CoordActionReadyXCommand(coordAction.getJobId()));
                 }
             }
         }

@@ -31,12 +31,12 @@ import org.apache.oozie.command.jpa.CoordJobActionsGetCommand;
 
 import java.util.List;
 
-public class XCoordResumeCommand extends XCoordinatorCommand<Void> {
+public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
 
     private String jobId;
     private final XLog log = XLog.getLog(getClass());
 
-    public XCoordResumeCommand(String id) {
+    public CoordResumeXCommand(String id) {
         super("coord_resume", "coord_resume", 1);
         this.jobId = ParamChecker.notEmpty(id, "id");
     }

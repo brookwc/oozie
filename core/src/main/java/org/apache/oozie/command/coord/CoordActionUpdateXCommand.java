@@ -31,12 +31,12 @@ import org.apache.oozie.client.SLAEvent.Status;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.jpa.CoordActionGetForExternalIdCommand;
 
-public class XCoordActionUpdateCommand extends XCoordinatorCommand<Void> {
+public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
     private final XLog log = XLog.getLog(getClass());
     private WorkflowJobBean workflow;
     private CoordinatorActionBean caction = null;
 
-    public XCoordActionUpdateCommand(WorkflowJobBean workflow) {
+    public CoordActionUpdateXCommand(WorkflowJobBean workflow) {
         //super("coord-action-update", "coord-action-update", 1, XLog.OPS);
         super("coord-action-update", "coord-action-update", 1);
         this.workflow = workflow;
@@ -106,7 +106,7 @@ public class XCoordActionUpdateCommand extends XCoordinatorCommand<Void> {
                     SLADbOperations.writeStausEvent(caction.getSlaXml(), caction.getId(), slaStatus,
                                                     SlaAppType.COORDINATOR_ACTION, log);
                 }
-                queue(new XCoordActionReadyCommand(caction.getJobId()));
+                queue(new CoordActionReadyXCommand(caction.getJobId()));
             }
         }
         catch (XException ex) {

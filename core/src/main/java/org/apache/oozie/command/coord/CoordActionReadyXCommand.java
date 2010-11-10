@@ -27,11 +27,11 @@ import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.util.XLog;
 
-public class XCoordActionReadyCommand extends XCoordinatorCommand<Void> {
+public class CoordActionReadyXCommand extends CoordinatorXCommand<Void> {
     private String jobId;
     private final XLog log = XLog.getLog(getClass());
 
-    public XCoordActionReadyCommand(String id) {
+    public CoordActionReadyXCommand(String id) {
         //super("coord_action_ready", "coord_action_ready", 1, XLog.STD);
         super("coord_action_ready", "coord_action_ready", 1);
         this.jobId = id;
@@ -106,7 +106,7 @@ public class XCoordActionReadyCommand extends XCoordinatorCommand<Void> {
                 // change state of action to SUBMITTED
                 action.setStatus(CoordinatorAction.Status.SUBMITTED);
                 // queue action to start action
-                queue(new XCoordActionStartCommand(action.getId(), user, authToken), 100);
+                queue(new CoordActionStartXCommand(action.getId(), user, authToken), 100);
                 jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(action));
             }
             else {
