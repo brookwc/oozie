@@ -14,36 +14,45 @@
  */
 package org.apache.oozie.command.jpa;
 
-import javax.persistence.EntityManager;
+import java.util.List;
 
-import org.apache.oozie.WorkflowActionBean;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.apache.oozie.CoordinatorActionBean;
+import org.apache.oozie.ErrorCode;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.util.ParamChecker;
-import org.apache.oozie.ErrorCode;
 
 /**
- * Persist the WorkflowAction bean.
+ * Load the CoordinatorAction into a Bean and return it.
  */
-public class WorkflowActionUpdateCommand implements JPACommand<String> {
+public class CoordActionGetForExternalIdCommand implements JPACommand<CoordinatorActionBean> {
 
-    private WorkflowActionBean wfAction = null;
+    private String externalId = null;
 
-    public WorkflowActionUpdateCommand(WorkflowActionBean wfAction) {
-        ParamChecker.notNull(wfAction, "wfAction");
-        this.wfAction = wfAction;
+    public CoordActionGetForExternalIdCommand(String externalId) {
+        ParamChecker.notNull(externalId, "externalId");
+        this.externalId = externalId;
     }
 
     @Override
     public String getName() {
-        return "WorkflowActionUpdateCommand";
+        return "CoordinatorActionGetCommand";
     }
 
     @Override
-    public String execute(EntityManager em) throws CommandException {
-        
+    @SuppressWarnings("unchecked")
+    public CoordinatorActionBean execute(EntityManager em) throws CommandException {
         try {
-            em.merge(wfAction);
-            return null;
+            CoordinatorActionBean caBean = null;
+            Query q = em.createNamedQuery("GET_COORD_ACTION_FOR_EXTERNALID");
+            q.setParameter("externalId", externalId);
+            List<CoordinatorActionBean> actionList = q.getResultList();
+            if (actionList.size() > 0) {
+                caBean = actionList.get(0);
+            }
+            return caBean;
         }
         catch (Exception e) {
             throw new CommandException(ErrorCode.E0603, e);
