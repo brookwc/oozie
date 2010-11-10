@@ -24,11 +24,11 @@ import org.apache.oozie.util.ParamChecker;
 /**
  * Load the CoordinatorJob into a Bean and return it.
  */
-public class CoordJobRunningActionsCountGetCommand implements JPACommand<Integer> {
+public class CoordJobGetRunningActionsCountCommand implements JPACommand<Integer> {
 
     private String coordJobId = null;
 
-    public CoordJobRunningActionsCountGetCommand(String coordJobId) {
+    public CoordJobGetRunningActionsCountCommand(String coordJobId) {
         ParamChecker.notNull(coordJobId, "coordJobId");
         this.coordJobId = coordJobId;
     }

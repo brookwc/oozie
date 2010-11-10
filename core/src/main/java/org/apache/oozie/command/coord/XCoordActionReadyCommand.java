@@ -22,7 +22,7 @@ import org.apache.oozie.ErrorCode;
 import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.jpa.CoordJobGetReadyActionsCommand;
-import org.apache.oozie.command.jpa.CoordJobRunningActionsCountGetCommand;
+import org.apache.oozie.command.jpa.CoordJobGetRunningActionsCountCommand;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.util.XLog;
@@ -73,7 +73,7 @@ public class XCoordActionReadyCommand extends XCoordinatorCommand<Void> {
             // in WF engine
             
             //int numRunningJobs = store.getCoordinatorRunningActionsCount(jobId);
-            int numRunningJobs = jpaService.execute(new CoordJobRunningActionsCountGetCommand(jobId)); 
+            int numRunningJobs = jpaService.execute(new CoordJobGetRunningActionsCountCommand(jobId)); 
             
             numActionsToStart = jobConcurrency - numRunningJobs;
             if (numActionsToStart < 0) {
