@@ -35,9 +35,9 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
     private final XLog log = XLog.getLog(getClass());
     private WorkflowJobBean workflow;
     private CoordinatorActionBean caction = null;
+    private JPAService jpaService = null;
 
     public CoordActionUpdateXCommand(WorkflowJobBean workflow) {
-        //super("coord-action-update", "coord-action-update", 1, XLog.OPS);
         super("coord-action-update", "coord-action-update", 1);
         this.workflow = workflow;
     }
@@ -46,18 +46,6 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
     protected Void execute() throws CommandException {
         try {
             log.info("STARTED CoordActionUpdateCommand for wfId=" + workflow.getId());
-            
-            JPAService jpaService = Services.get().get(JPAService.class);
-            if (jpaService == null) {
-                log.error(ErrorCode.E0610);
-            }
-            
-            //caction = store.getCoordinatorActionForExternalId(workflow.getId());
-            caction = jpaService.execute(new CoordActionGetForExternalIdCommand(workflow.getId()));
-            if (caction == null) {
-                log.info("ENDED CoordActionUpdateCommand for wfId=" + workflow.getId() + ", coord action is null");
-                return null;
-            }
 
             if (workflow.getStatus() == WorkflowJob.Status.RUNNING
                     || workflow.getStatus() == WorkflowJob.Status.SUSPENDED) {
@@ -127,8 +115,19 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
     }
 
     @Override
-    protected void loadState() {
-
+    protected void loadState() throws CommandException {
+        JPAService jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            log.error(ErrorCode.E0610);
+        }
+        
+        caction = jpaService.execute(new CoordActionGetForExternalIdCommand(workflow.getId()));
+        /*
+        if (caction == null) {
+            log.info("ENDED CoordActionUpdateCommand for wfId=" + workflow.getId() + ", coord action is null");
+            return null;
+        }
+        */
     }
 
     @Override

@@ -317,7 +317,7 @@ public abstract class XCommand<T> implements XCallable<T> {
      * Subclasses must implement this method and load the state needed to do the precondition check and execute the
      * command.
      */
-    protected abstract void loadState();
+    protected abstract void loadState() throws CommandException;
 
     /**
      * Verify the precondition for the command after a lock has been obtain, just before executing the command.
