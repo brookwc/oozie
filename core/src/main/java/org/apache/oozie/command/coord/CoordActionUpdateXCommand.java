@@ -29,6 +29,7 @@ import org.apache.oozie.client.WorkflowJob;
 import org.apache.oozie.client.SLAEvent.SlaAppType;
 import org.apache.oozie.client.SLAEvent.Status;
 import org.apache.oozie.command.CommandException;
+import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.command.jpa.CoordActionGetForExternalIdCommand;
 
 public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
@@ -50,7 +51,6 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
             if (workflow.getStatus() == WorkflowJob.Status.RUNNING
                     || workflow.getStatus() == WorkflowJob.Status.SUSPENDED) {
                 //update lastModifiedTime
-                //cstore.updateCoordinatorAction(caction);
                 caction.setLastModifiedTime(new Date());
                 jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
                     
@@ -77,7 +77,6 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
                             log.warn(
                                     "Unexpected workflow " + workflow.getId() + " STATUS " + workflow.getStatus());
                             //update lastModifiedTime
-                            //cstore.updateCoordinatorAction(caction);
                             caction.setLastModifiedTime(new Date());
                             jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
                             
@@ -87,7 +86,6 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
                 }
 
                 log.info("Updating Coordintaor id :" + caction.getId() + "status to =" + caction.getStatus());
-                //cstore.updateCoordinatorAction(caction);
                 caction.setLastModifiedTime(new Date());
                 jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
                 if (slaStatus != null) {
@@ -122,16 +120,13 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
         }
         
         caction = jpaService.execute(new CoordActionGetForExternalIdCommand(workflow.getId()));
-        /*
-        if (caction == null) {
-            log.info("ENDED CoordActionUpdateCommand for wfId=" + workflow.getId() + ", coord action is null");
-            return null;
-        }
-        */
+        setLogInfo(caction);
     }
 
     @Override
-    protected void verifyPrecondition() throws CommandException {
-
+    protected void verifyPrecondition() throws CommandException, PreconditionException {
+        if (caction == null) {
+            throw new PreconditionException(ErrorCode.E1100, workflow.getId() + ", coord action is null");
+        }
     }
 }

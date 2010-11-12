@@ -10,6 +10,7 @@ import org.apache.oozie.XException;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.OozieClient;
 import org.apache.oozie.command.CommandException;
+import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.command.jpa.CoordJobGetCommand;
 import org.apache.oozie.command.jpa.CoordJobUpdateCommand;
 import org.apache.oozie.service.JPAService;
@@ -126,7 +127,7 @@ public class CoordChangeXCommand extends CoordinatorXCommand<Void> {
      * @see org.apache.oozie.command.XCommand#eagerVerifyPrecondition()
      */
     @Override
-    protected void eagerVerifyPrecondition() throws CommandException {
+    protected void eagerVerifyPrecondition() throws CommandException, PreconditionException {
         super.eagerVerifyPrecondition();
         parseChangeValue(this.changeValue);
     }
