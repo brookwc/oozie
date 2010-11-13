@@ -15,6 +15,7 @@
 package org.apache.oozie.command.coord;
 
 import java.io.IOException;
+
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,8 +26,6 @@ import org.apache.oozie.ErrorCode;
 import org.apache.oozie.client.OozieClient;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.PreconditionException;
-import org.apache.oozie.store.CoordinatorStore;
-import org.apache.oozie.store.StoreException;
 import org.apache.oozie.util.XConfiguration;
 import org.apache.oozie.util.XLog;
 
@@ -37,7 +36,7 @@ public class CoordActionNotificationXCommand extends CoordinatorXCommand<Void> {
     private static final String ACTION_ID_PATTERN = "\\$actionId";
 
     private int retries = 0;
-    private final XLog log = XLog.getLog(getClass());
+    private static XLog log = XLog.getLog(CoordActionNotificationXCommand.class);
 
 	public CoordActionNotificationXCommand(CoordinatorActionBean actionBean) {
 		super("coord_action_notification", "coord_action_notification", 0);

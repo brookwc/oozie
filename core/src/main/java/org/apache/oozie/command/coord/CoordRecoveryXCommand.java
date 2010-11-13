@@ -14,61 +14,65 @@
  */
 package org.apache.oozie.command.coord;
 
+import java.util.Date;
+
 import org.apache.oozie.CoordinatorJobBean;
+import org.apache.oozie.ErrorCode;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.command.CommandException;
-import org.apache.oozie.store.CoordinatorStore;
-import org.apache.oozie.store.StoreException;
+import org.apache.oozie.command.PreconditionException;
+import org.apache.oozie.command.jpa.CoordJobGetCommand;
+import org.apache.oozie.command.jpa.CoordJobUpdateCommand;
+import org.apache.oozie.service.JPAService;
+import org.apache.oozie.service.Services;
 import org.apache.oozie.util.XLog;
 
-public class CoordRecoveryXCommand extends CoordinatorCommand<Void> {
-    private final XLog log = XLog.getLog(getClass());
+public class CoordRecoveryXCommand extends CoordinatorXCommand<Void> {
+    private static XLog log = XLog.getLog(CoordRecoveryXCommand.class);
     private String jobId;
+    private JPAService jpaService = null;
+    CoordinatorJobBean coordJob = null;
 
     public CoordRecoveryXCommand(String id) {
-        super("coord_recovery", "coord_recovery", 1, XLog.STD);
+        super("coord_recovery", "coord_recovery", 1);
         this.jobId = id;
     }
 
     @Override
-    protected Void call(CoordinatorStore store) throws StoreException {
-        //CoordinatorJobBean coordJob = store.getCoordinatorJob(jobId, true);
-        CoordinatorJobBean coordJob = store.getEntityManager().find(CoordinatorJobBean.class, jobId);
-        setLogInfo(coordJob);
-        if (coordJob.getStatus() == CoordinatorJob.Status.PREMATER) {
-            // update status of job from PREMATER to RUNNING in coordJob
-            coordJob.setStatus(CoordinatorJob.Status.RUNNING);
-            store.updateCoordinatorJob(coordJob);
-            log.debug("[" + jobId + "]: Recover status from PREMATER to RUNNING");
-        }
-        else {
-            log.debug("[" + jobId + "]: already in non-PREMATER status");
-        }
+    protected Void execute() throws CommandException {
+        // update status of job from PREMATER to RUNNING in coordJob
+        coordJob.setStatus(CoordinatorJob.Status.RUNNING);
+        coordJob.setLastModifiedTime(new Date());
+        jpaService.execute(new CoordJobUpdateCommand(coordJob));
+        log.debug("[" + jobId + "]: Recover status from PREMATER to RUNNING");
         return null;
     }
 
     @Override
-    protected Void execute(CoordinatorStore store) throws StoreException, CommandException {
-        log.info("STARTED CoordRecoveryCommand for jobId=" + jobId);
-        try {
-            if (lock(jobId)) {
-                call(store);
-            }
-            else {
-                queueCallable(new CoordRecoveryXCommand(jobId), LOCK_FAILURE_REQUEUE_INTERVAL);
-                log.warn("CoordRecoveryCommand lock was not acquired - failed jobId=" + jobId
-                        + ". Requeing the same.");
-            }
+    protected String getEntityKey() {
+        return jobId;
+    }
+
+    @Override
+    protected boolean isLockRequired() {
+        return true;
+    }
+
+    @Override
+    protected void loadState() throws CommandException {
+        jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            throw new CommandException(ErrorCode.E0610);
         }
-        catch (InterruptedException e) {
-            queueCallable(new CoordRecoveryXCommand(jobId), LOCK_FAILURE_REQUEUE_INTERVAL);
-            log.warn("CoordRecoveryCommand lock acquiring failed with exception " + e.getMessage()
-                    + " for jobId=" + jobId + " Requeing the same.");
+        coordJob = jpaService.execute(new CoordJobGetCommand(jobId));
+        setLogInfo(coordJob);
+    }
+
+    @Override
+    protected void verifyPrecondition() throws CommandException, PreconditionException {
+        if (coordJob.getStatus() != CoordinatorJob.Status.PREMATER) {
+            throw new PreconditionException(ErrorCode.E1100);
         }
-        finally {
-            log.info("ENDED CoordRecoveryCommand for jobId=" + jobId);
-        }
-        return null;
     }
 
 }
