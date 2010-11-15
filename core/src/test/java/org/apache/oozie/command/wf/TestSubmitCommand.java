@@ -54,7 +54,7 @@ public class TestSubmitCommand extends XFsTestCase {
         conf.set(OozieClient.USER_NAME, getTestUser());
         conf.set(OozieClient.GROUP_NAME, "other");
         conf.set("GB", "5");
-        XSubmitCommand sc = new XSubmitCommand(conf, "UNIT_TESTING");
+        SubmitXCommand sc = new SubmitXCommand(conf, "UNIT_TESTING");
 
         try {
             sc.call();
@@ -77,7 +77,7 @@ public class TestSubmitCommand extends XFsTestCase {
         conf.set(OozieClient.APP_PATH, appPath+"/workflow.xml");
         conf.set(OozieClient.USER_NAME, getTestUser());
         conf.set(OozieClient.GROUP_NAME, "other");
-        XSubmitCommand sc = new XSubmitCommand(conf, "UNIT_TESTING");
+        SubmitXCommand sc = new SubmitXCommand(conf, "UNIT_TESTING");
 
         try {
             sc.call();
@@ -99,7 +99,7 @@ public class TestSubmitCommand extends XFsTestCase {
         conf.set(OozieClient.APP_PATH, appPath+"/test.xml");
         conf.set(OozieClient.USER_NAME, getTestUser());
         conf.set(OozieClient.GROUP_NAME, "other");
-        XSubmitCommand sc = new XSubmitCommand(conf, "UNIT_TESTING");
+        SubmitXCommand sc = new SubmitXCommand(conf, "UNIT_TESTING");
 
         try {
             sc.call();
@@ -121,7 +121,7 @@ public class TestSubmitCommand extends XFsTestCase {
         conf.set(OozieClient.APP_PATH, appPath+"/does_not_exist.xml");
         conf.set(OozieClient.USER_NAME, getTestUser());
         conf.set(OozieClient.GROUP_NAME, "other");
-        XSubmitCommand sc = new XSubmitCommand(conf, "UNIT_TESTING");
+        SubmitXCommand sc = new SubmitXCommand(conf, "UNIT_TESTING");
 
         try {
             sc.call();

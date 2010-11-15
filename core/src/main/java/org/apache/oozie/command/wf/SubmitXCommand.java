@@ -65,15 +65,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.io.IOException;
 
-public class XSubmitCommand extends XWorkflowCommand<String> {
-    private static XLog LOG = XLog.getLog(XSubmitCommand.class);
+public class SubmitXCommand extends WorkflowXCommand<String> {
+    private static XLog LOG = XLog.getLog(SubmitXCommand.class);
     
     public static final String CONFIG_DEFAULT = "config-default.xml";
 
     private Configuration conf;
     private String authToken;
 
-    public XSubmitCommand(Configuration conf, String authToken) {
+    public SubmitXCommand(Configuration conf, String authToken) {
         super("submit", "submit", 1);
         this.conf = ParamChecker.notNull(conf, "conf");
         this.authToken = ParamChecker.notEmpty(authToken, "authToken");
@@ -97,7 +97,7 @@ public class XSubmitCommand extends XWorkflowCommand<String> {
 
     @Override
     protected String execute() throws CommandException {
-        //incrJobCounter(1);
+        incrJobCounter(1);
         WorkflowAppService wps = Services.get().get(WorkflowAppService.class);
         try {
             XLog.Info.get().setParameter(DagXLogInfoService.TOKEN, conf.get(OozieClient.LOG_TOKEN));
@@ -261,7 +261,7 @@ public class XSubmitCommand extends XWorkflowCommand<String> {
 
     @Override
     protected boolean isLockRequired() {
-        return true;
+        return false;
     }
 
     @Override

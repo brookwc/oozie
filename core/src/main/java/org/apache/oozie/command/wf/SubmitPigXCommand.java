@@ -26,8 +26,8 @@ import org.apache.oozie.command.CommandException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XSubmitPigCommand extends XSubmitHttpCommand {
-    public XSubmitPigCommand(Configuration conf, String authToken) {
+public class SubmitPigXCommand extends SubmitHttpXCommand {
+    public SubmitPigXCommand(Configuration conf, String authToken) {
         super("submitPig", "submitPig", conf, authToken);
     }
 
@@ -166,7 +166,7 @@ public class XSubmitPigCommand extends XSubmitHttpCommand {
 
     @Override
     protected boolean isLockRequired() {
-        return true;
+        return false;
     }
 
     @Override

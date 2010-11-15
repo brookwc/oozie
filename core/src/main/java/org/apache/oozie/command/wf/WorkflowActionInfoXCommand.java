@@ -24,14 +24,14 @@ import org.apache.oozie.util.XLog;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 
-public class XWorkflowActionInfoCommand extends XWorkflowCommand<WorkflowActionBean> {
+public class WorkflowActionInfoXCommand extends WorkflowXCommand<WorkflowActionBean> {
     private String id;
-    private static XLog LOG = XLog.getLog(XWorkflowActionInfoCommand.class);
+    private static XLog LOG = XLog.getLog(WorkflowActionInfoXCommand.class);
     
     /**
      * @param id
      */
-    public XWorkflowActionInfoCommand(String id) {
+    public WorkflowActionInfoXCommand(String id) {
         super("action.info", "action.info", 1);
         this.id = ParamChecker.notEmpty(id, "id");
         LOG.debug("Command for workflow action " + id);

@@ -27,10 +27,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class XSubmitMRCommand extends XSubmitHttpCommand {
+public class SubmitMRXCommand extends SubmitHttpXCommand {
     private static final Set<String> SKIPPED_CONFS = new HashSet<String>();
 
-    public XSubmitMRCommand(Configuration conf, String authToken) {
+    public SubmitMRXCommand(Configuration conf, String authToken) {
         super("submitMR", "submitMR", conf, authToken);
     }
 
@@ -160,7 +160,7 @@ public class XSubmitMRCommand extends XSubmitHttpCommand {
 
     @Override
     protected boolean isLockRequired() {
-        return true;
+        return false;
     }
 
     @Override

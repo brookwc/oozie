@@ -45,8 +45,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
-public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
-    private static XLog LOG = XLog.getLog(XSubmitHttpCommand.class);
+public abstract class SubmitHttpXCommand extends WorkflowXCommand<String> {
+    private static XLog LOG = XLog.getLog(SubmitHttpXCommand.class);
     
     protected static final Set<String> MANDATORY_OOZIE_CONFS = new HashSet<String>();
     protected static final Set<String> OPTIONAL_OOZIE_CONFS = new HashSet<String>();
@@ -63,7 +63,7 @@ public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
     private Configuration conf;
     private String authToken;
 
-    public XSubmitHttpCommand(String name, String type, Configuration conf, String authToken) {
+    public SubmitHttpXCommand(String name, String type, Configuration conf, String authToken) {
         super(name, type, 1);
         this.conf = ParamChecker.notNull(conf, "conf");
         this.authToken = ParamChecker.notEmpty(authToken, "authToken");
@@ -98,7 +98,7 @@ public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
      */
     @Override
     protected String execute() throws CommandException {
-        //incrJobCounter(1);
+        incrJobCounter(1);
         WorkflowAppService wps = Services.get().get(WorkflowAppService.class);
         try {
             XLog.Info.get().setParameter(DagXLogInfoService.TOKEN, conf.get(OozieClient.LOG_TOKEN));
@@ -146,8 +146,7 @@ public abstract class XSubmitHttpCommand extends XWorkflowCommand<String> {
             workflow.setWorkflowInstance(wfInstance);
             workflow.setExternalId(conf.get(OozieClient.EXTERNAL_ID));
 
-            //setLogInfo(workflow);
-            //store.insertWorkflow(workflow);
+            setLogInfo(workflow);
             JPAService jpaService = Services.get().get(JPAService.class);
             if (jpaService != null) {
                 jpaService.execute(new WorkflowJobInsertCommand(workflow));

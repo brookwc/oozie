@@ -16,14 +16,14 @@ package org.apache.oozie.command.wf;
 
 import org.apache.oozie.command.XCommand;
 
-public abstract class XWorkflowCommand<T> extends XCommand<T> {
+public abstract class WorkflowXCommand<T> extends XCommand<T> {
 
     /**
      * @param name command name.
      * @param type command type.
      * @param priority priority of the command, used when queuing for asynchronous execution.
      */
-    public XWorkflowCommand(String name, String type, int priority) {
+    public WorkflowXCommand(String name, String type, int priority) {
         super(name, type, priority);
     }
     

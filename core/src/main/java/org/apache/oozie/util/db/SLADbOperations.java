@@ -23,7 +23,7 @@ import org.apache.oozie.client.SLAEvent.SlaAppType;
 import org.apache.oozie.client.SLAEvent.Status;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.jpa.SLAEventInsertCommand;
-import org.apache.oozie.command.wf.XSubmitHttpCommand;
+import org.apache.oozie.command.wf.SubmitHttpXCommand;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.service.StoreService;

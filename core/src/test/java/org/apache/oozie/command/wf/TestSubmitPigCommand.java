@@ -54,7 +54,7 @@ public class TestSubmitPigCommand extends XFsTestCase {
         String[] args = pigArgsStr.split(" ");
         MapReduceMain.setStrings(conf, XOozieClient.PIG_OPTIONS, args);
 
-        XSubmitPigCommand submitPigCmd = new XSubmitPigCommand(conf, "token");
+        SubmitPigXCommand submitPigCmd = new SubmitPigXCommand(conf, "token");
         String xml = submitPigCmd.getWorkflowXml(conf);
 
         XLog.getLog(getClass()).info("xml = " + xml);
@@ -122,7 +122,7 @@ public class TestSubmitPigCommand extends XFsTestCase {
         args[1] = "aaa bbb";
         MapReduceMain.setStrings(conf, XOozieClient.PIG_OPTIONS, args);
 
-        XSubmitPigCommand submitPigCmd = new XSubmitPigCommand(conf, "token");
+        SubmitPigXCommand submitPigCmd = new SubmitPigXCommand(conf, "token");
         String xml = submitPigCmd.getWorkflowXml(conf);
 
         XLog.getLog(getClass()).info("xml = " + xml);
@@ -168,7 +168,7 @@ public class TestSubmitPigCommand extends XFsTestCase {
         String pigArgsStr = "-a aaa -b bbb -c ccc -M -Da=aaa -Db=bbb -param input=abc";
         conf.set(XOozieClient.PIG_OPTIONS, pigArgsStr);
 
-        XSubmitPigCommand submitPigCmd = new XSubmitPigCommand(conf, "token");
+        SubmitPigXCommand submitPigCmd = new SubmitPigXCommand(conf, "token");
         try {
             submitPigCmd.getWorkflowXml(conf);
             fail("shoud have already failed - missing libpath def");
