@@ -23,6 +23,7 @@ import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagEngineException;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.command.CommandException;
+import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.service.DagEngineService;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
@@ -54,6 +55,7 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
     private String user = null;
     private String authToken = null;
     private CoordinatorActionBean coordAction = null;
+    private JPAService jpaService = null;
 
     public CoordActionStartXCommand(String id, String user, String token) {
         //super("coord_action_start", "coord_action_start", 1, XLog.OPS);
@@ -135,7 +137,6 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
         ParamChecker.notEmpty(user, "user");
         ParamChecker.notEmpty(authToken, "authToken");
 
-        // CoordinatorActionBean coordAction = store.getCoordinatorAction(id, true);
         log.debug("actionid=" + actionId + ", status=" + coordAction.getStatus());
         if (coordAction.getStatus() == CoordinatorAction.Status.SUBMITTED) {
             // log.debug("getting.. job id: " + coordAction.getJobId());
@@ -215,7 +216,7 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected String getEntityKey() {
-        return null;
+        return coordAction.getJobId();
     }
 
     @Override
@@ -224,12 +225,20 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
     }
 
     @Override
-    protected void loadState() {
+    protected void loadState() throws CommandException {
+        jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            throw new CommandException(ErrorCode.E0610);
+        }
 
+        coordAction = jpaService.execute(new org.apache.oozie.command.jpa.CoordActionGetCommand(actionId));
+        setLogInfo(coordAction);
     }
 
     @Override
-    protected void verifyPrecondition() throws CommandException {
-
+    protected void verifyPrecondition() throws PreconditionException {
+        if (coordAction.getStatus() != CoordinatorAction.Status.SUBMITTED) {
+            throw new PreconditionException(ErrorCode.E1100);
+        }
     }
 }

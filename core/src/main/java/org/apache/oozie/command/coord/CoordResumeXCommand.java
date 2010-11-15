@@ -20,6 +20,7 @@ import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.XException;
 import org.apache.oozie.command.CommandException;
+import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.util.ParamChecker;
@@ -32,9 +33,10 @@ import org.apache.oozie.command.jpa.CoordJobActionsGetCommand;
 import java.util.List;
 
 public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
-
     private String jobId;
-    private final XLog log = XLog.getLog(getClass());
+    private final static XLog log = XLog.getLog(CoordResumeXCommand.class);
+    private CoordinatorJobBean coordJob = null;
+    private JPAService jpaService = null;
 
     public CoordResumeXCommand(String id) {
         super("coord_resume", "coord_resume", 1);
@@ -43,38 +45,21 @@ public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected Void execute() throws CommandException {
-        try {
-            //CoordinatorJobBean coordJob = store.getEntityManager().find(CoordinatorJobBean.class, jobId);
-            //setLogInfo(coordJob);
-            CoordinatorJobBean coordJob;
-            JPAService jpaService = Services.get().get(JPAService.class);
-            if (jpaService != null) {
-                coordJob = jpaService.execute(new CoordJobGetCommand(jobId));
-            }
-            else {
-                log.error(ErrorCode.E0610);
-                return null;
-            }
+        try {            
+            incrJobCounter(1);
+            coordJob.setStatus(CoordinatorJob.Status.PREP);
             
-            if (coordJob.getStatus() == CoordinatorJob.Status.SUSPENDED) {
-                //incrJobCounter(1);
-                coordJob.setStatus(CoordinatorJob.Status.PREP);
-                
-                List<CoordinatorActionBean> actionList = jpaService.execute(new CoordJobActionsGetCommand(jobId));
-                
-                for (CoordinatorActionBean action : actionList) {
-                    // queue a ResumeCommand
-                    if (action.getExternalId() != null) {
-                        //TODO
-                        //queueCallable(new ResumeCommand(action.getExternalId()));
-                    }
+            List<CoordinatorActionBean> actionList = jpaService.execute(new CoordJobActionsGetCommand(jobId));
+            
+            for (CoordinatorActionBean action : actionList) {
+                // queue a ResumeCommand
+                if (action.getExternalId() != null) {
+                    //TODO
+                    //queue(new ResumeCommand(action.getExternalId()));
                 }
-                jpaService.execute(new CoordJobUpdateCommand(coordJob));
             }
-            // TODO queueCallable(new NotificationCommand(coordJob));
-            else {
-                log.info("CoordResumeCommand not Resumed - " + "job not in SUSPENDED state " + jobId);
-            }
+            jpaService.execute(new CoordJobUpdateCommand(coordJob));
+
             return null;
         }
         catch (XException ex) {
@@ -84,7 +69,7 @@ public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected String getEntityKey() {
-        return null;
+        return jobId;
     }
 
     @Override
@@ -93,12 +78,19 @@ public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
     }
 
     @Override
-    protected void loadState() {
-
+    protected void loadState() throws CommandException {
+        jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            throw new CommandException(ErrorCode.E0610);
+        }
+        coordJob = jpaService.execute(new CoordJobGetCommand(jobId));
+        setLogInfo(coordJob);
     }
 
     @Override
-    protected void verifyPrecondition() throws CommandException {
-
+    protected void verifyPrecondition() throws CommandException, PreconditionException {
+        if (coordJob.getStatus() != CoordinatorJob.Status.SUSPENDED) {
+            throw new PreconditionException(ErrorCode.E1100, "CoordResumeCommand not Resumed - " + "job not in SUSPENDED state " + jobId);
+        }
     }
 }

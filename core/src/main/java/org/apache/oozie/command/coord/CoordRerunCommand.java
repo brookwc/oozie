@@ -99,7 +99,7 @@ public class CoordRerunCommand extends CoordinatorCommand<CoordinatorActionInfo>
                         updateAction(coordJob, coordAction, actionXml, store);
 
                         // TODO: time 100s should be configurable
-                        queueCallable(new CoordActionNotification(coordAction), 100);
+                        queueCallable(new CoordActionNotificationCommand(coordAction), 100);
                         queueCallable(new CoordActionInputCheckCommand(coordAction.getId()), 100);
                     }
                 }

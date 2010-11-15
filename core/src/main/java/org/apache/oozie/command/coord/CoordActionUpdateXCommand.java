@@ -33,9 +33,9 @@ import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.command.jpa.CoordActionGetForExternalIdCommand;
 
 public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
-    private final XLog log = XLog.getLog(getClass());
+    private final static XLog log = XLog.getLog(CoordActionUpdateXCommand.class);
     private WorkflowJobBean workflow;
-    private CoordinatorActionBean caction = null;
+    private CoordinatorActionBean coordAction = null;
     private JPAService jpaService = null;
 
     public CoordActionUpdateXCommand(WorkflowJobBean workflow) {
@@ -48,52 +48,41 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
         try {
             log.info("STARTED CoordActionUpdateCommand for wfId=" + workflow.getId());
 
-            if (workflow.getStatus() == WorkflowJob.Status.RUNNING
-                    || workflow.getStatus() == WorkflowJob.Status.SUSPENDED) {
-                //update lastModifiedTime
-                caction.setLastModifiedTime(new Date());
-                jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
-                    
-                return null;
-            }
-            
             Status slaStatus = null;
-            if (caction != null) {
-                if (workflow.getStatus() == WorkflowJob.Status.SUCCEEDED) {
-                    caction.setStatus(CoordinatorAction.Status.SUCCEEDED);
-                    slaStatus = Status.SUCCEEDED;
+
+            if (workflow.getStatus() == WorkflowJob.Status.SUCCEEDED) {
+                coordAction.setStatus(CoordinatorAction.Status.SUCCEEDED);
+                slaStatus = Status.SUCCEEDED;
+            }
+            else {
+                if (workflow.getStatus() == WorkflowJob.Status.FAILED) {
+                    coordAction.setStatus(CoordinatorAction.Status.FAILED);
+                    slaStatus = Status.FAILED;
                 }
                 else {
-                    if (workflow.getStatus() == WorkflowJob.Status.FAILED) {
-                        caction.setStatus(CoordinatorAction.Status.FAILED);
-                        slaStatus = Status.FAILED;
+                    if (workflow.getStatus() == WorkflowJob.Status.KILLED) {
+                        coordAction.setStatus(CoordinatorAction.Status.KILLED);
+                        slaStatus = Status.KILLED;
                     }
                     else {
-                        if (workflow.getStatus() == WorkflowJob.Status.KILLED) {
-                            caction.setStatus(CoordinatorAction.Status.KILLED);
-                            slaStatus = Status.KILLED;
-                        }
-                        else {
-                            log.warn(
-                                    "Unexpected workflow " + workflow.getId() + " STATUS " + workflow.getStatus());
-                            //update lastModifiedTime
-                            caction.setLastModifiedTime(new Date());
-                            jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
-                            
-                            return null;
-                        }
+                        log.warn("Unexpected workflow " + workflow.getId() + " STATUS " + workflow.getStatus());
+                        //update lastModifiedTime
+                        coordAction.setLastModifiedTime(new Date());
+                        jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(coordAction));
+                        
+                        return null;
                     }
                 }
-
-                log.info("Updating Coordintaor id :" + caction.getId() + "status to =" + caction.getStatus());
-                caction.setLastModifiedTime(new Date());
-                jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(caction));
-                if (slaStatus != null) {
-                    SLADbOperations.writeStausEvent(caction.getSlaXml(), caction.getId(), slaStatus,
-                                                    SlaAppType.COORDINATOR_ACTION, log);
-                }
-                queue(new CoordActionReadyXCommand(caction.getJobId()));
             }
+
+            log.info("Updating Coordintaor id :" + coordAction.getId() + "status to =" + coordAction.getStatus());
+            coordAction.setLastModifiedTime(new Date());
+            jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(coordAction));
+            if (slaStatus != null) {
+                SLADbOperations.writeStausEvent(coordAction.getSlaXml(), coordAction.getId(), slaStatus,
+                                                SlaAppType.COORDINATOR_ACTION, log);
+            }
+            queue(new CoordActionReadyXCommand(coordAction.getJobId()));
         }
         catch (XException ex) {
             log.warn("CoordActionUpdate Failed ", ex.getMessage());
@@ -104,7 +93,7 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected String getEntityKey() {
-        return null;
+        return coordAction.getJobId();
     }
 
     @Override
@@ -114,19 +103,27 @@ public class CoordActionUpdateXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected void loadState() throws CommandException {
-        JPAService jpaService = Services.get().get(JPAService.class);
+        jpaService = Services.get().get(JPAService.class);
         if (jpaService == null) {
-            log.error(ErrorCode.E0610);
+            throw new CommandException(ErrorCode.E0610);
         }
         
-        caction = jpaService.execute(new CoordActionGetForExternalIdCommand(workflow.getId()));
-        setLogInfo(caction);
+        coordAction = jpaService.execute(new CoordActionGetForExternalIdCommand(workflow.getId()));
+        setLogInfo(coordAction);
     }
 
     @Override
     protected void verifyPrecondition() throws CommandException, PreconditionException {
-        if (caction == null) {
+        if (coordAction == null) {
             throw new PreconditionException(ErrorCode.E1100, workflow.getId() + ", coord action is null");
+        }
+        
+        if (workflow.getStatus() == WorkflowJob.Status.RUNNING
+                || workflow.getStatus() == WorkflowJob.Status.SUSPENDED) {
+            //update lastModifiedTime
+            coordAction.setLastModifiedTime(new Date());
+            jpaService.execute(new org.apache.oozie.command.jpa.CoordActionUpdateCommand(coordAction));
+            throw new PreconditionException(ErrorCode.E1100);
         }
     }
 }

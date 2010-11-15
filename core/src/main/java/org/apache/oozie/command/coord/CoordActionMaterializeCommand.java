@@ -230,7 +230,7 @@ public class CoordActionMaterializeCommand extends CoordinatorCommand<Void> {
         writeActionRegistration(actionXml, actionBean, store);
 
         // TODO: time 100s should be configurable
-        queueCallable(new CoordActionNotification(actionBean), 100);
+        queueCallable(new CoordActionNotificationCommand(actionBean), 100);
         queueCallable(new CoordActionInputCheckCommand(actionBean.getId()), 100);
     }
 

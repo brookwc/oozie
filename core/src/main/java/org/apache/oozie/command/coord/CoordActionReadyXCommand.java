@@ -29,10 +29,11 @@ import org.apache.oozie.util.XLog;
 
 public class CoordActionReadyXCommand extends CoordinatorXCommand<Void> {
     private String jobId;
-    private final XLog log = XLog.getLog(getClass());
+    private final static XLog log = XLog.getLog(CoordActionReadyXCommand.class);
+    private CoordinatorJobBean coordJob = null;
+    private JPAService jpaService = null;
 
     public CoordActionReadyXCommand(String id) {
-        //super("coord_action_ready", "coord_action_ready", 1, XLog.STD);
         super("coord_action_ready", "coord_action_ready", 1);
         this.jobId = id;
     }
@@ -47,21 +48,7 @@ public class CoordActionReadyXCommand extends CoordinatorXCommand<Void> {
     protected Void execute() throws CommandException {
         // number of actions to start (-1 means start ALL)
         int numActionsToStart = -1;
-        // get CoordinatorJobBean for jobId
-        //CoordinatorJobBean coordJob = store.getCoordinatorJob(jobId, false);
-        
-        //CoordinatorJobBean coordJob = store.getEntityManager().find(CoordinatorJobBean.class, jobId);
-        //setLogInfo(coordJob);
-        
-        CoordinatorJobBean coordJob = null;
-        JPAService jpaService = Services.get().get(JPAService.class);
-        if (jpaService != null) {
-            coordJob = jpaService.execute(new org.apache.oozie.command.jpa.CoordJobGetCommand(jobId));
-        }
-        else {
-            log.error(ErrorCode.E0610);
-        }
-        
+
         // get execution setting for this job (FIFO, LIFO, LAST_ONLY)
         String jobExecution = coordJob.getExecution();
         // get concurrency setting for this job
@@ -120,7 +107,7 @@ public class CoordActionReadyXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected String getEntityKey() {
-        return null;
+        return jobId;
     }
 
     @Override
@@ -129,13 +116,18 @@ public class CoordActionReadyXCommand extends CoordinatorXCommand<Void> {
     }
 
     @Override
-    protected void loadState() {
-        
+    protected void loadState() throws CommandException {
+        jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            throw new CommandException(ErrorCode.E0610);
+        }
+
+        coordJob = jpaService.execute(new org.apache.oozie.command.jpa.CoordJobGetCommand(jobId));
+        setLogInfo(coordJob);
     }
 
     @Override
     protected void verifyPrecondition() throws CommandException {
         
     }
-
 }

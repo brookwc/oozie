@@ -58,7 +58,6 @@ import org.apache.oozie.service.HadoopAccessorService;
 import org.apache.oozie.service.WorkflowAppService;
 import org.apache.oozie.service.SchemaService.SchemaName;
 import org.apache.oozie.service.UUIDService.ApplicationType;
-import org.apache.oozie.store.CoordinatorStore;
 import org.apache.oozie.store.StoreException;
 import org.apache.oozie.util.DateUtils;
 import org.apache.oozie.util.ELEvaluator;
@@ -86,6 +85,7 @@ public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
     private Configuration conf;
     private String authToken;
     private boolean dryrun;
+    private JPAService jpaService = null;
 
     public static final String CONFIG_DEFAULT = "coord-config-default.xml";
     public static final String COORDINATOR_XML_FILE = "coordinator.xml";
@@ -142,7 +142,7 @@ public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
     protected String execute() throws CommandException {
         String jobId = null;
         log.info("STARTED Coordinator Submit");
-        //incrJobCounter(1);
+        incrJobCounter(1);
         CoordinatorJobBean coordJob = new CoordinatorJobBean();
         try {
             XLog.Info.get().setParameter(DagXLogInfoService.TOKEN, conf.get(OozieClient.LOG_TOKEN));
@@ -158,14 +158,12 @@ public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
 
             jobId = storeToDB(eJob, coordJob);
             // log JOB info for coordinator jobs
-            //setLogInfo(coordJob);
+            setLogInfo(coordJob);
 
             if (!dryrun) {
                 // submit a command to materialize jobs for the next 1 hour (3600 secs)
                 // so we don't wait 10 mins for the Service to run.
-                
-                //TODO
-                //queue(new CoordJobMatLookupCommand(jobId, 3600), 100);
+                queue(new CoordJobMatLookupXCommand(jobId, 3600), 100);
             }
             else {
                 Date startTime = coordJob.getStartTime();
@@ -814,14 +812,8 @@ public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
         coordJob.setLastModifiedTime(new Date());
 
         if (!dryrun) {
-            //store.insertCoordinatorJob(coordJob);
-            JPAService jpaService = Services.get().get(JPAService.class);
-            if (jpaService != null) {
-                jpaService.execute(new CoordJobInsertCommand(coordJob));
-            }
-            else {
-                log.error(ErrorCode.E0610);
-            }
+            coordJob.setLastModifiedTime(new Date());
+            jpaService.execute(new CoordJobInsertCommand(coordJob));
         }
         return jobId;
     }
@@ -883,12 +875,15 @@ public class CoordSubmitXCommand extends CoordinatorXCommand<String> {
 
     @Override
     protected boolean isLockRequired() {
-        return true;
+        return false;
     }
 
     @Override
-    protected void loadState() {
-
+    protected void loadState() throws CommandException {
+        jpaService = Services.get().get(JPAService.class);
+        if (jpaService == null) {
+            throw new CommandException(ErrorCode.E0610);
+        }
     }
 
     @Override

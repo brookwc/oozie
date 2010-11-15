@@ -293,7 +293,7 @@ public class CoordActionMaterializeXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected void loadState() throws CommandException {
-        JPAService jpaService = Services.get().get(JPAService.class);
+        jpaService = Services.get().get(JPAService.class);
         if (jpaService == null) {
             log.error(ErrorCode.E0610);
         }

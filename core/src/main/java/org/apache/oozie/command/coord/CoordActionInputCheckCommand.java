@@ -105,7 +105,7 @@ public class CoordActionInputCheckCommand extends CoordinatorCommand<Void> {
                     long waitingTime = (actualTime.getTime() - coordAction.getNominalTime().getTime()) / (60 * 1000);
                     int timeOut = coordAction.getTimeOut();
                     if ((timeOut >= 0) && (waitingTime > timeOut)) {
-                        queueCallable(new CoordActionTimeOut(coordAction), 100);
+                        queueCallable(new CoordActionTimeOutCommand(coordAction), 100);
                         coordAction.setStatus(CoordinatorAction.Status.TIMEDOUT);
                     }
                     else {

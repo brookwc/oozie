@@ -60,13 +60,12 @@ public class CoordActionTimeOutXCommand extends CoordinatorXCommand<Void> {
     @Override
     protected void loadState() throws CommandException {
         jpaService = Services.get().get(JPAService.class);
-        if (jpaService != null) {
-            actionBean = jpaService.execute(new CoordActionGetCommand(actionBean.getId()));
-            setLogInfo(actionBean);
-        }
-        else {
+        if (jpaService == null) {
             throw new CommandException(ErrorCode.E0610);
         }
+            
+        actionBean = jpaService.execute(new CoordActionGetCommand(actionBean.getId()));
+        setLogInfo(actionBean);
     }
 
     @Override
