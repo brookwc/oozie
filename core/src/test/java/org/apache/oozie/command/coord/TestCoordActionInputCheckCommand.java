@@ -34,7 +34,7 @@ import org.apache.oozie.store.StoreException;
 import org.apache.oozie.test.XTestCase;
 import org.apache.oozie.util.DateUtils;
 
-public class TestCoordActionInputCheck extends XTestCase {
+public class TestCoordActionInputCheckCommand extends XTestCase {
     private Services services;
 
     protected void setUp() throws Exception {
@@ -66,21 +66,6 @@ public class TestCoordActionInputCheck extends XTestCase {
         createDir(getTestCaseDir() + "/2009/15/");
         new CoordActionInputCheckCommand(jobId + "@1").call();
         checkCoordAction(jobId + "@1");
-    }
-
-    private void addRecordToActionTable(String jobId, int actionNum, CoordinatorStore store) throws StoreException {
-        // CoordinatorStore store = new CoordinatorStore(false);
-        CoordinatorActionBean action = new CoordinatorActionBean();
-        action.setJobId(jobId);
-        action.setId(jobId + "@" + actionNum);
-        action.setActionNumber(actionNum);
-        action.setNominalTime(new Date());
-        action.setLastModifiedTime(new Date());
-        action.setStatus(Status.WAITING);
-        // action.setActionXml("");
-        store.beginTrx();
-        store.insertCoordinatorAction(action);
-        store.commitTrx();
     }
 
     private void addRecordToJobTable(String jobId, CoordinatorStore store) throws StoreException {

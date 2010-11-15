@@ -358,13 +358,18 @@ public class CoordActionInputCheckXCommand extends CoordinatorXCommand<Void> {
     }
 
     @Override
-    protected void loadState() throws CommandException {
+    protected void eagerLoadState() throws CommandException {
         jpaService = Services.get().get(JPAService.class);
         if (jpaService == null) {
             throw new CommandException(ErrorCode.E0610);
         }
         coordAction = jpaService.execute(new CoordActionGetCommand(actionId));
         setLogInfo(coordAction);
+    }
+    
+    @Override
+    protected void loadState() throws CommandException {
+
     }
 
     @Override

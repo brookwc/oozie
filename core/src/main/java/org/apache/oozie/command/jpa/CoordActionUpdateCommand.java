@@ -22,7 +22,7 @@ import org.apache.oozie.util.ParamChecker;
 import org.apache.oozie.ErrorCode;
 
 /**
- * Persist the WorkflowJob bean.
+ * Persist the coordinator action bean.
  */
 public class CoordActionUpdateCommand implements JPACommand<String> {
 

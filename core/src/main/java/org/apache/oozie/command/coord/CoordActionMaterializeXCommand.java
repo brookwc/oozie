@@ -283,7 +283,7 @@ public class CoordActionMaterializeXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected String getEntityKey() {
-        return job.getId();
+        return jobId;
     }
 
     @Override

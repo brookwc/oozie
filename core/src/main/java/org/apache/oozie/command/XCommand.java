@@ -88,6 +88,7 @@ public abstract class XCommand<T> implements XCallable<T> {
         this.type = type;
         this.priority = priority;
         createdTime = System.currentTimeMillis();
+        logInfo = new XLog.Info(XLog.Info.get());
     }
 
     /**
@@ -98,10 +99,7 @@ public abstract class XCommand<T> implements XCallable<T> {
      *        really running the job
      */
     public XCommand(String name, String type, int priority, boolean dryrun) {
-        this.name = name;
-        this.type = type;
-        this.priority = priority;
-        createdTime = System.currentTimeMillis();
+        this(name, type, priority);
         this.dryrun = dryrun;
     }
 
