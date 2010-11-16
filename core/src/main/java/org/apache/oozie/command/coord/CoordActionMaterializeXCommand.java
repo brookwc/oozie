@@ -24,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.ErrorCode;
+import org.apache.oozie.XException;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.SLAEvent.SlaAppType;
 import org.apache.oozie.command.CommandException;
@@ -322,7 +323,7 @@ public class CoordActionMaterializeXCommand extends CoordinatorXCommand<Void> {
             
             job.setLastModifiedTime(new Date());
             jpaService.execute(new CoordJobUpdateCommand(job));
-            
+
             throw new PreconditionException(ErrorCode.E1100, "ENDED Coordinator materialization for jobId = " + jobId + " Materialization start time = " + startTime
                     + " is after or equal to coordinator job's pause time = " + job.getPauseTime() + " Job status = " + job.getStatusStr());
         }

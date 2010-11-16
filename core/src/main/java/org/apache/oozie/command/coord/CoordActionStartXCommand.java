@@ -226,6 +226,11 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
 
     @Override
     protected void loadState() throws CommandException {
+
+    }
+    
+    @Override
+    protected void eagerLoadState() throws CommandException {
         jpaService = Services.get().get(JPAService.class);
         if (jpaService == null) {
             throw new CommandException(ErrorCode.E0610);

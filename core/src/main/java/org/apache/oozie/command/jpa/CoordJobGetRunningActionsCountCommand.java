@@ -44,7 +44,7 @@ public class CoordJobGetRunningActionsCountCommand implements JPACommand<Integer
             Query q = em.createNamedQuery("GET_COORD_RUNNING_ACTIONS_COUNT");
 
             q.setParameter("jobId", coordJobId);
-            Integer count = (Integer) q.getSingleResult();
+            Long count = (Long) q.getSingleResult();
             return Integer.valueOf(count.intValue());
         }
         catch (Exception e) {

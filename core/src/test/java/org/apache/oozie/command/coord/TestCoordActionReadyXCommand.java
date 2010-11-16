@@ -12,58 +12,60 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License. See accompanying LICENSE file.
  */
-
 package org.apache.oozie.command.coord;
 
-import java.io.IOException;
 import java.util.Date;
 
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.CoordinatorJobBean;
+import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.client.CoordinatorJob;
-import org.apache.oozie.client.OozieClient;
+import org.apache.oozie.client.CoordinatorAction.Status;
 import org.apache.oozie.client.CoordinatorJob.Execution;
-import org.apache.oozie.client.CoordinatorJob.Timeunit;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.jpa.CoordActionGetCommand;
+import org.apache.oozie.command.jpa.CoordActionInsertCommand;
 import org.apache.oozie.command.jpa.CoordJobInsertCommand;
-import org.apache.oozie.service.JPAService;
-import org.apache.oozie.service.Services;
 import org.apache.oozie.util.DateUtils;
 
-public class TestCoordActionInputCheckXCommand extends CoordXTestCase {
-    public void testActionInputCheck() throws Exception {
-        String jobId = "0000000-" + new Date().getTime() + "-testActionInputCheck-C";
+public class TestCoordActionReadyXCommand extends CoordXTestCase {
+    public void testActionReadyCommand() throws CommandException {
+        String jobId = "0000000-" + new Date().getTime()
+                + "-testActionReadyCommand-C";
         addRecordToJobTable(jobId);
+        addRecordToActionTable(jobId, 1);
 
-        Date startTime = DateUtils.parseDateUTC("2009-02-01T23:59Z");
-        Date endTime = DateUtils.parseDateUTC("2009-02-02T23:59Z");
-        new CoordActionMaterializeXCommand(jobId, startTime, endTime).call();
-        createDir(getTestCaseDir() + "/2009/29/");
-        createDir(getTestCaseDir() + "/2009/15/");
-        new CoordActionInputCheckXCommand(jobId + "@1").call();
+        new CoordActionReadyXCommand(jobId).call();
         checkCoordAction(jobId + "@1");
     }
 
-    private void addRecordToJobTable(String jobId) throws CommandException {
+    private void addRecordToActionTable(String jobId, int actionNum) throws CommandException {
+        CoordinatorActionBean action = new CoordinatorActionBean();
+        action.setJobId(jobId);
+        action.setId(jobId + "@" + actionNum);
+        action.setActionNumber(actionNum);
+        action.setNominalTime(new Date());
+        action.setLastModifiedTime(new Date());
+        action.setStatus(Status.READY);
+        // action.setActionXml("");
+        
+        jpaService.execute(new CoordActionInsertCommand(action));
+    }
+
+    private void addRecordToJobTable(String jobId)
+            throws CommandException {
         CoordinatorJobBean coordJob = new CoordinatorJobBean();
         coordJob.setId(jobId);
         coordJob.setAppName("testApp");
         coordJob.setAppPath("testAppPath");
-        coordJob.setStatus(CoordinatorJob.Status.PREMATER);
+        coordJob.setStatus(CoordinatorJob.Status.RUNNING);
         coordJob.setCreatedTime(new Date()); // TODO: Do we need that?
         coordJob.setLastModifiedTime(new Date());
         coordJob.setUser("testUser");
         coordJob.setGroup("testGroup");
         coordJob.setAuthToken("notoken");
-        coordJob.setTimeZone("UTC");
-        coordJob.setTimeUnit(Timeunit.DAY);
 
-        String testDir = getTestCaseDir();
-
-        String confStr = "<configuration>" + "<property> <name>" + OozieClient.USER_NAME
-                + "</name><value>testUser</value></property>" + "<property> <name>" + OozieClient.GROUP_NAME
-                + "</name><value>testGroup</value></property>" + "</configuration>";
+        String confStr = "<configuration></configuration>";
         coordJob.setConf(confStr);
         String appXml = "<coordinator-app xmlns='uri:oozie:coordinator:0.1' name='NAME' frequency=\"1\" start='2009-02-01T01:00Z' end='2009-02-03T23:59Z' timezone='UTC' freq_timeunit='DAY' end_of_duration='NONE'>";
         appXml += "<controls>";
@@ -73,20 +75,18 @@ public class TestCoordActionInputCheckXCommand extends CoordXTestCase {
         appXml += "</controls>";
         appXml += "<input-events>";
         appXml += "<data-in name='A' dataset='a'>";
-        appXml += "<dataset name='a' frequency='7' initial-instance='2009-01-01T01:00Z' timezone='UTC' freq_timeunit='DAY' end_of_duration='NONE'>";
-        appXml += "<uri-template>file://" + testDir + "/${YEAR}/${DAY}</uri-template>";
+        appXml += "<dataset name='a' frequency='7' initial-instance='2009-02-01T01:00Z' timezone='UTC' freq_timeunit='DAY' end_of_duration='NONE'>";
+        appXml += "<uri-template>file:///tmp/coord/workflows/${YEAR}/${DAY}</uri-template>";
         appXml += "</dataset>";
-        appXml += "<start-instance>${coord:current(-3)}</start-instance>";
-        appXml += "<end-instance>${coord:current(0)}</end-instance>";
+        appXml += "<instance>${coord:latest(0)}</instance>";
         appXml += "</data-in>";
         appXml += "</input-events>";
         appXml += "<output-events>";
         appXml += "<data-out name='LOCAL_A' dataset='local_a'>";
-        appXml += "<dataset name='local_a' frequency='7' initial-instance='2009-01-01T01:00Z' timezone='UTC' freq_timeunit='DAY' end_of_duration='NONE'>";
-        appXml += "<uri-template>file://" + testDir + "/${YEAR}/${DAY}</uri-template>";
+        appXml += "<dataset name='local_a' frequency='7' initial-instance='2009-02-01T01:00Z' timezone='UTC' freq_timeunit='DAY' end_of_duration='NONE'>";
+        appXml += "<uri-template>file:///tmp/coord/workflows/${YEAR}/${DAY}</uri-template>";
         appXml += "</dataset>";
-        appXml += "<start-instance>${coord:current(-3)}</start-instance>";
-        appXml += "<instance>${coord:current(0)}</instance>";
+        appXml += "<instance>${coord:current(-1)}</instance>";
         appXml += "</data-out>";
         appXml += "</output-events>";
         appXml += "<action>";
@@ -111,40 +111,32 @@ public class TestCoordActionInputCheckXCommand extends CoordXTestCase {
         coordJob.setExecution(Execution.FIFO);
         coordJob.setConcurrency(1);
         try {
-            coordJob.setEndTime(DateUtils.parseDateUTC("2009-02-02T23:59Z"));
+            coordJob.setEndTime(DateUtils.parseDateUTC("2009-02-03T23:59Z"));
             coordJob.setStartTime(DateUtils.parseDateUTC("2009-02-01T23:59Z"));
         }
         catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-            // store.closeTrx();
             fail("Could not set Date/time");
         }
 
 
-        /*
-        store.beginTrx();
-        store.insertCoordinatorJob(coordJob);
-        store.commitTrx();
-        */
-        JPAService jpaService = Services.get().get(JPAService.class);
-        if (jpaService != null) {
+        try {
             jpaService.execute(new CoordJobInsertCommand(coordJob));
         }
-        else {
+        catch (CommandException ex) {
+            ex.printStackTrace();
             fail("Unable to insert the test job record to table");
+            throw ex;
         }
     }
 
     private void checkCoordAction(String actionId) {
         try {
-            CoordinatorActionBean action = jpaService.execute(new CoordActionGetCommand(actionId));
-            System.out.println("missingDeps " + action.getMissingDependencies() + " Xml " + action.getActionXml());
-            if (action.getMissingDependencies().indexOf("/2009/29/") >= 0) {
-                fail("directory should be resolved :" + action.getMissingDependencies());
-            }
-            if (action.getMissingDependencies().indexOf("/2009/15/") < 0) {
-                fail("directory should NOT be resolved :" + action.getMissingDependencies());
+            CoordinatorActionBean action = jpaService.execute(new CoordActionGetCommand(actionId)); 
+
+            if (action.getStatus() != CoordinatorAction.Status.SUBMITTED) {
+                fail("CoordActionReadyCommand didn't work because the status for action id"
+                        + actionId + " is :" + action.getStatus());
             }
         }
         catch (CommandException se) {
@@ -152,17 +144,4 @@ public class TestCoordActionInputCheckXCommand extends CoordXTestCase {
         }
     }
 
-    private void createDir(String dir) {
-        Process pr;
-        try {
-            pr = Runtime.getRuntime().exec("mkdir -p " + dir + "/_SUCCESS");
-            pr.waitFor();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

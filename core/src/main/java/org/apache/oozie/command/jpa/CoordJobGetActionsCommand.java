@@ -28,18 +28,18 @@ import org.apache.oozie.util.ParamChecker;
 /**
  * Load the CoordinatorJob into a Bean and return it.
  */
-public class CoordJobActionsGetCommand implements JPACommand<List<CoordinatorActionBean>> {
+public class CoordJobGetActionsCommand implements JPACommand<List<CoordinatorActionBean>> {
 
     private String coordJobId = null;
 
-    public CoordJobActionsGetCommand(String coordJobId) {
+    public CoordJobGetActionsCommand(String coordJobId) {
         ParamChecker.notNull(coordJobId, "coordJobId");
         this.coordJobId = coordJobId;
     }
 
     @Override
     public String getName() {
-        return "CoordJobActionsGetCommand";
+        return "CoordJobGetActionsCommand";
     }
 
     @Override
@@ -48,7 +48,7 @@ public class CoordJobActionsGetCommand implements JPACommand<List<CoordinatorAct
         List<CoordinatorActionBean> actionBeans = new ArrayList<CoordinatorActionBean>();
         try {
             Query q = em.createNamedQuery("GET_ACTIONS_FOR_COORD_JOB");
-            q.setParameter("id", coordJobId);
+            q.setParameter("jobId", coordJobId);
             List<CoordinatorActionBean> actions = q.getResultList();
             for (CoordinatorActionBean a : actions) {
                 CoordinatorActionBean aa = getBeanForRunningCoordAction(a);

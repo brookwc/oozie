@@ -28,7 +28,7 @@ import org.apache.oozie.util.XLog;
 
 import org.apache.oozie.command.jpa.CoordJobGetCommand;
 import org.apache.oozie.command.jpa.CoordJobUpdateCommand;
-import org.apache.oozie.command.jpa.CoordJobActionsGetCommand;
+import org.apache.oozie.command.jpa.CoordJobGetActionsCommand;
 
 import java.util.List;
 
@@ -49,7 +49,7 @@ public class CoordResumeXCommand extends CoordinatorXCommand<Void> {
             incrJobCounter(1);
             coordJob.setStatus(CoordinatorJob.Status.PREP);
             
-            List<CoordinatorActionBean> actionList = jpaService.execute(new CoordJobActionsGetCommand(jobId));
+            List<CoordinatorActionBean> actionList = jpaService.execute(new CoordJobGetActionsCommand(jobId));
             
             for (CoordinatorActionBean action : actionList) {
                 // queue a ResumeCommand
