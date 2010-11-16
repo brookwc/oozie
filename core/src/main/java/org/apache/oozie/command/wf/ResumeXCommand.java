@@ -23,7 +23,7 @@ import org.apache.oozie.client.WorkflowJob;
 import org.apache.oozie.command.CommandException;
 import org.apache.oozie.command.PreconditionException;
 import org.apache.oozie.command.jpa.WorkflowActionUpdateCommand;
-import org.apache.oozie.command.jpa.WorkflowActionsGetForJobCommand;
+import org.apache.oozie.command.jpa.WorkflowJobGetActionsCommand;
 import org.apache.oozie.command.jpa.WorkflowJobGetCommand;
 import org.apache.oozie.command.jpa.WorkflowJobUpdateCommand;
 import org.apache.oozie.service.JPAService;
@@ -56,7 +56,7 @@ public class ResumeXCommand extends WorkflowXCommand<Void> {
                 
                 
                 //for (WorkflowActionBean action : store.getActionsForWorkflow(id, false)) {
-                for (WorkflowActionBean action : jpaService.execute(new WorkflowActionsGetForJobCommand(id))) {
+                for (WorkflowActionBean action : jpaService.execute(new WorkflowJobGetActionsCommand(id))) {
 
                     // Set pending flag to true for the actions that are START_RETRY or
                     // START_MANUAL or END_RETRY or END_MANUAL

@@ -28,18 +28,18 @@ import org.apache.oozie.util.ParamChecker;
 /**
  * Load the list of CoordinatorAction subset for a CoordJob and return the list.
  */
-public class CoordActionsSubsetGetForJobCommand implements JPACommand<List<CoordinatorActionBean>> {
+public class CoordJobGetActionsSubsetCommand implements JPACommand<List<CoordinatorActionBean>> {
 
     private String coordJobId = null;
     private int start = 1;
     private int len = 50;
 
-    public CoordActionsSubsetGetForJobCommand(String coordJobId) {
+    public CoordJobGetActionsSubsetCommand(String coordJobId) {
         ParamChecker.notNull(coordJobId, "coordJobId");
         this.coordJobId = coordJobId;
     }
 
-    public CoordActionsSubsetGetForJobCommand(String coordJobId, int start, int len) {
+    public CoordJobGetActionsSubsetCommand(String coordJobId, int start, int len) {
         this(coordJobId);
         this.start = start;
         this.len = len;

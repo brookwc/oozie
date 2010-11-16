@@ -29,11 +29,11 @@ import org.apache.oozie.util.ParamChecker;
 /**
  * Load the list of WorkflowAction for a WorkflowJob and return the list.
  */
-public class WorkflowActionsGetForJobCommand implements JPACommand<List<WorkflowActionBean>> {
+public class WorkflowJobGetActionsCommand implements JPACommand<List<WorkflowActionBean>> {
 
     private String wfJobId = null;
 
-    public WorkflowActionsGetForJobCommand(String wfJobId) {
+    public WorkflowJobGetActionsCommand(String wfJobId) {
         ParamChecker.notNull(wfJobId, "wfJobId");
         this.wfJobId = wfJobId;
     }
