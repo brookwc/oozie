@@ -22,7 +22,6 @@ import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.CoordinatorAction.Status;
-import org.apache.oozie.command.CommandException;
 import org.apache.oozie.service.JPAService;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.test.XTestCase;
@@ -139,7 +138,7 @@ public class TestCoordJPACommands extends XTestCase {
     }
 
     private void _testInsertAction(String jobId, String actionId) {
-        CoordinatorActionBean action = createAction(jobId, actionId);
+        createAction(jobId, actionId);
     }
 
     private CoordinatorActionBean createAction(String jobId, String actionId) {
@@ -259,22 +258,5 @@ public class TestCoordJPACommands extends XTestCase {
         coordJob.setStartTime(new Date(curr.getTime() - 86400000));
         return coordJob;
     }
-
-    /**
-     * Helper methods
-     *
-     * @param jobId
-     * @throws StoreException
-     */
-    private CoordinatorActionBean getCoordAction(String actionId) {
-        try {
-            CoordinatorActionBean action = jpaService.execute(new CoordActionGetCommand(actionId));
-            return action;
-        }
-        catch (CommandException se) {
-            fail("Job ID " + actionId + " was not stored properly in db");
-        }
-        return null;
-    }
-
+    
 }
