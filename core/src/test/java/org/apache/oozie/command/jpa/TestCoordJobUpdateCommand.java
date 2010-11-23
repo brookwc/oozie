@@ -48,6 +48,7 @@ public class TestCoordJobUpdateCommand extends XFsTestCase {
         services = new Services();
         services.init();
         cleanUpDBTables();
+        LocalOozie.start();
     }
 
     /* (non-Javadoc)
@@ -55,6 +56,7 @@ public class TestCoordJobUpdateCommand extends XFsTestCase {
      */
     @Override
     protected void tearDown() throws Exception {
+        LocalOozie.stop();
         services.destroy();
         super.tearDown();
     }
