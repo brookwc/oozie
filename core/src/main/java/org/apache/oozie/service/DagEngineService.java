@@ -15,6 +15,7 @@
 package org.apache.oozie.service;
 
 import org.apache.oozie.DagEngine;
+import org.apache.oozie.DagXEngine;
 import org.apache.oozie.service.Service;
 import org.apache.oozie.service.Services;
 
@@ -53,8 +54,8 @@ public class DagEngineService implements Service {
      * @param authToken the authentication token.
      * @return the dag engine for the specified user.
      */
-    public DagEngine getDagEngine(String user, String authToken) {
-        return new DagEngine(user, authToken);
+    public DagXEngine getDagEngine(String user, String authToken) {
+        return new DagXEngine(user, authToken);
     }
 
     /**
@@ -62,8 +63,8 @@ public class DagEngineService implements Service {
      *
      * @return a system Dag engine.
      */
-    public DagEngine getSystemDagEngine() {
-        return new DagEngine();
+    public DagXEngine getSystemDagEngine() {
+        return new DagXEngine();
     }
 
 }

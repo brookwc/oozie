@@ -19,6 +19,7 @@ import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.WorkflowActionBean;
 import org.apache.oozie.WorkflowJobBean;
+import org.apache.oozie.XException;
 import org.apache.oozie.service.CallableQueueService;
 import org.apache.oozie.service.DagXLogInfoService;
 import org.apache.oozie.service.InstrumentationService;
@@ -88,7 +89,8 @@ public abstract class XCommand<T> implements XCallable<T> {
         this.type = type;
         this.priority = priority;
         createdTime = System.currentTimeMillis();
-        logInfo = new XLog.Info(XLog.Info.get());        
+        logInfo = new XLog.Info(XLog.Info.get());
+        instrumentation = Services.get().get(InstrumentationService.class).get();
     }
 
     /**
@@ -282,7 +284,18 @@ public abstract class XCommand<T> implements XCallable<T> {
             instrumentation.incr(INSTRUMENTATION_GROUP, getName() + ".preconditionfailed", 1);
             return null;
         }
+        catch (XException ex) {
+            LOG.error("XException, {0}", ex);
+            instrumentation.incr(INSTRUMENTATION_GROUP, getName() + ".xexceptions", 1);
+            if (ex instanceof CommandException) {
+                throw (CommandException) ex;
+            }
+            else {
+                throw new CommandException(ex);
+            }
+        }
         catch (Exception ex) {
+            LOG.error("Exception, {0}", ex);
             instrumentation.incr(INSTRUMENTATION_GROUP, getName() + ".exceptions", 1);
             throw new CommandException(ErrorCode.E0607, ex);
         }

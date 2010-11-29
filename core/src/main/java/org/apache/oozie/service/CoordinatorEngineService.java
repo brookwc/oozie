@@ -15,6 +15,7 @@
 package org.apache.oozie.service;
 
 import org.apache.oozie.CoordinatorEngine;
+import org.apache.oozie.CoordinatorXEngine;
 import org.apache.oozie.service.Service;
 import org.apache.oozie.service.Services;
 
@@ -53,8 +54,8 @@ public class CoordinatorEngineService implements Service {
      * @param authToken the authentication token.
      * @return the coordinator engine for the specified user.
      */
-    public CoordinatorEngine getCoordinatorEngine(String user, String authToken) {
-        return new CoordinatorEngine(user, authToken);
+    public CoordinatorXEngine getCoordinatorEngine(String user, String authToken) {
+        return new CoordinatorXEngine(user, authToken);
     }
 
     /**
@@ -62,8 +63,8 @@ public class CoordinatorEngineService implements Service {
      *
      * @return a system Coordinator engine.
      */
-    public CoordinatorEngine getSystemCoordinatorEngine() {
-        return new CoordinatorEngine();
+    public CoordinatorXEngine getSystemCoordinatorEngine() {
+        return new CoordinatorXEngine();
     }
 
 }

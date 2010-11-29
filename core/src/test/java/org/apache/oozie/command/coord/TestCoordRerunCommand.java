@@ -70,175 +70,175 @@ public class TestCoordRerunCommand extends XFsTestCase {
         super.tearDown();
     }
 
-    /**
-     * Test : rerun <jobId> -action 1 -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunActions1() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId, false);
-        assertEquals(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, true);
-
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -action 1-2 -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunActions2() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        String rerunScope = Integer.toString(actionNum1) + "-" + Integer.toString(actionNum2);
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
-        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -action 1,2 -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunActions3() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-        String rerunScope = Integer.toString(actionNum1) + "," + Integer.toString(actionNum2);
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
-        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-    }
-
-    /**
-     * Negative Test : rerun <jobId> -action 1-3 -nocleanup. Only 2 actions is
-     * in db.
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunActionsNeg1() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        String rerunScope = "1-3";
-        try {
-            final OozieClient coordClient = LocalOozie.getCoordClient();
-            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
-            fail("Exception expected because one action is missing from db.");
-        }
-        catch (OozieClientException ex) {
-        }
-    }
+//    /**
+//     * Test : rerun <jobId> -action 1 -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunActions1() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId, false);
+//        assertEquals(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, true);
+//
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -action 1-2 -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunActions2() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        String rerunScope = Integer.toString(actionNum1) + "-" + Integer.toString(actionNum2);
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
+//        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -action 1,2 -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunActions3() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//        String rerunScope = Integer.toString(actionNum1) + "," + Integer.toString(actionNum2);
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
+//        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//    }
+//
+//    /**
+//     * Negative Test : rerun <jobId> -action 1-3 -nocleanup. Only 2 actions is
+//     * in db.
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunActionsNeg1() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        String rerunScope = "1-3";
+//        try {
+//            final OozieClient coordClient = LocalOozie.getCoordClient();
+//            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, rerunScope, false, true);
+//            fail("Exception expected because one action is missing from db.");
+//        }
+//        catch (OozieClientException ex) {
+//        }
+//    }
 
     /**
      * Negative Test : rerun <jobId> -action 1 -nocleanup. Action is not in
@@ -273,6 +273,9 @@ public class TestCoordRerunCommand extends XFsTestCase {
             fail("Exception expected because action is not in terminal state.");
         }
         catch (OozieClientException ex) {
+            //XXX
+            System.out.println("errorcode = " + ex.getErrorCode());
+            
             if (!ex.getErrorCode().equals(ErrorCode.E1018.toString())) {
                 fail("Error code should be E1018 when action is not in terminal state.");
             }
@@ -286,431 +289,431 @@ public class TestCoordRerunCommand extends XFsTestCase {
         store2.closeTrx();
     }
 
-    /**
-     * Test : rerun <jobId> -date 2009-12-15T17:00Z -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunDate1() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId, false);
-        assertEquals(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, "2009-12-15T01:00Z", false, true);
-
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -date 2009-12-15T01:00Z::2009-12-16T01:00Z -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunDate2() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        String rerunScope = "2009-12-15T01:00Z" + "::" + "2009-12-16T01:00Z";
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
-        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -date 2009-12-15T01:00Z,2009-12-16T01:00Z -nocleanup
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunDate3() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        String rerunScope = "2009-12-15T01:00Z" + "," + "2009-12-16T01:00Z";
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
-        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -date 2009-12-15T01:00Z::2009-12-17T01:00Z -nocleanup
-     * 2009-12-17T01:00Z is not in the action list, but Oozie will tolerate this.
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunDate4() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        String rerunScope = "2009-12-15T01:00Z" + "::" + "2009-12-17T01:00Z";
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
-
-        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store1.beginTrx();
-        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
-        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store1.commitTrx();
-        store1.closeTrx();
-    }
-
-    /**
-     * Test : rerun <jobId> -date 2009-12-15T01:00Z,2009-12-16T01:00Z,2009-12-17T01:00Z -nocleanup
-     * 2009-12-17T01:00Z is not in the action list, Oozie will not tolerate this when comma is used.
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunDateNeg() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum1 = 1;
-        final int actionNum2 = 2;
-        final String actionId1 = jobId + "@" + actionNum1;
-        final String actionId2 = jobId + "@" + actionNum2;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action2.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-        String rerunScope = "2009-12-15T01:00Z,2009-12-16T01:00Z,2009-12-17T01:00Z";
-        try {
-            final OozieClient coordClient = LocalOozie.getCoordClient();
-            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
-            fail("Exception expected because one action is missing from db.");
-        }
-        catch (OozieClientException ex) {
-        }
-
-    }
-
-    /**
-     * Test : rerun <jobId> -action 1 -nocleanup -refresh
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunRefresh() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-        Path appPath = new Path(getFsTestCaseDir(), "coord");
-        String inputDir = appPath.toString() + "/coord-input/2010/07/09/01/00";
-        FileSystem fs = getFileSystem();
-        fs.mkdirs(new Path(inputDir));
-        fs.create(new Path(inputDir, "_SUCCESS"), true);
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), true, true);
-
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-
-        waitFor(120 * 1000, new Predicate() {
-            public boolean evaluate() throws Exception {
-                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
-                return (bean.getStatus() == CoordinatorAction.Status.READY || bean.getStatus() == CoordinatorAction.Status.SUBMITTED);
-            }
-        });
-
-        CoordinatorStore store3 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store3.beginTrx();
-        CoordinatorActionBean action3 = store3.getCoordinatorAction(actionId, false);
-        String actionXml = action3.getActionXml();
-        System.out.println("After refresh, action xml= " + actionXml);
-
-        Element eAction = XmlUtils.parseXml(actionXml);
-        String[] urls = getActionXmlUrls(eAction, getTestUser(), getTestGroup());
-        store3.commitTrx();
-        store3.closeTrx();
-
-        if (urls != null) {
-            assertEquals(inputDir, urls[0]);
-        }
-        else {
-            fail("After refresh, latest() should get the inputDir:" + inputDir);
-        }
-    }
-
-    /**
-     * Test : rerun <jobId> -action 1
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunCleanup() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-        Path appPath = new Path(getFsTestCaseDir(), "coord");
-        String outputDir = appPath.toString() + "/coord-input/2009/12/14/11/00";
-        Path success = new Path(outputDir, "_SUCCESS");
-        FileSystem fs = getFileSystem();
-        fs.mkdirs(new Path(outputDir));
-        fs.create(success, true);
-        // before cleanup
-        assertTrue(fs.exists(success));
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, false);
-
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-
-        waitFor(120 * 1000, new Predicate() {
-            public boolean evaluate() throws Exception {
-                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
-                return (bean.getStatus() == CoordinatorAction.Status.WAITING || bean.getStatus() == CoordinatorAction.Status.READY);
-            }
-        });
-
-        // after cleanup
-        assertFalse(fs.exists(success));
-    }
-
-    /**
-     * Test : rerun <jobId> -action 1 with no output-event
-     * 
-     * @throws Exception
-     */
-    public void testCoordRerunCleanupNoOutputEvents() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action3.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        final OozieClient coordClient = LocalOozie.getCoordClient();
-        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, false);
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-        waitFor(120 * 1000, new Predicate() {
-            public boolean evaluate() throws Exception {
-                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
-                return (bean.getStatus() == CoordinatorAction.Status.WAITING || bean.getStatus() == CoordinatorAction.Status.READY);
-            }
-        });
-        CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
-        assertTrue(bean.getStatus() == CoordinatorAction.Status.WAITING
-                || bean.getStatus() == CoordinatorAction.Status.READY);
-    }
-
- /**
-     * Negative Test : rerun <jobId> -action 1 -nocleanup.
-     * Coordiantor job is killed, so no actions are able to rerun.
-     *
-     * @throws Exception
-     */
-    public void testCoordRerunNeg() throws Exception {
-        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
-        final int actionNum = 1;
-        final String actionId = jobId + "@" + actionNum;
-        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store.beginTrx();
-        try {
-            addRecordToJobTable(jobId, store, CoordinatorJob.Status.KILLED);
-            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
-                    "coord-rerun-action1.xml");
-            store.commitTrx();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Could not update db.");
-        }
-        finally {
-            store.closeTrx();
-        }
-
-        try {
-            final OozieClient coordClient = LocalOozie.getCoordClient();
-            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false,
-                    true);
-            fail("Exception expected because action is not in terminal state.");
-        }
-        catch (OozieClientException ex) {
-            if (!ex.getErrorCode().equals(ErrorCode.E1018.toString())) {
-                fail("Error code should be E1018 when job is killed or failed.");
-            }
-        }
-
-        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
-        store2.beginTrx();
-        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
-        assertEquals(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
-        store2.commitTrx();
-        store2.closeTrx();
-    }
+//    /**
+//     * Test : rerun <jobId> -date 2009-12-15T17:00Z -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunDate1() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId, false);
+//        assertEquals(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, "2009-12-15T01:00Z", false, true);
+//
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -date 2009-12-15T01:00Z::2009-12-16T01:00Z -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunDate2() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        String rerunScope = "2009-12-15T01:00Z" + "::" + "2009-12-16T01:00Z";
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
+//        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -date 2009-12-15T01:00Z,2009-12-16T01:00Z -nocleanup
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunDate3() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        String rerunScope = "2009-12-15T01:00Z" + "," + "2009-12-16T01:00Z";
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
+//        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -date 2009-12-15T01:00Z::2009-12-17T01:00Z -nocleanup
+//     * 2009-12-17T01:00Z is not in the action list, but Oozie will tolerate this.
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunDate4() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        String rerunScope = "2009-12-15T01:00Z" + "::" + "2009-12-17T01:00Z";
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
+//
+//        CoordinatorStore store1 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store1.beginTrx();
+//        CoordinatorActionBean action1 = store1.getCoordinatorAction(actionId1, false);
+//        assertNotSame(action1.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        CoordinatorActionBean action2 = store1.getCoordinatorAction(actionId2, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store1.commitTrx();
+//        store1.closeTrx();
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -date 2009-12-15T01:00Z,2009-12-16T01:00Z,2009-12-17T01:00Z -nocleanup
+//     * 2009-12-17T01:00Z is not in the action list, Oozie will not tolerate this when comma is used.
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunDateNeg() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum1 = 1;
+//        final int actionNum2 = 2;
+//        final String actionId1 = jobId + "@" + actionNum1;
+//        final String actionId2 = jobId + "@" + actionNum2;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum1, actionId1, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            addRecordToActionTable(jobId, actionNum2, actionId2, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action2.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//        String rerunScope = "2009-12-15T01:00Z,2009-12-16T01:00Z,2009-12-17T01:00Z";
+//        try {
+//            final OozieClient coordClient = LocalOozie.getCoordClient();
+//            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_DATE, rerunScope, false, true);
+//            fail("Exception expected because one action is missing from db.");
+//        }
+//        catch (OozieClientException ex) {
+//        }
+//
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -action 1 -nocleanup -refresh
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunRefresh() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//        Path appPath = new Path(getFsTestCaseDir(), "coord");
+//        String inputDir = appPath.toString() + "/coord-input/2010/07/09/01/00";
+//        FileSystem fs = getFileSystem();
+//        fs.mkdirs(new Path(inputDir));
+//        fs.create(new Path(inputDir, "_SUCCESS"), true);
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), true, true);
+//
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//
+//        waitFor(120 * 1000, new Predicate() {
+//            public boolean evaluate() throws Exception {
+//                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
+//                return (bean.getStatus() == CoordinatorAction.Status.READY || bean.getStatus() == CoordinatorAction.Status.SUBMITTED);
+//            }
+//        });
+//
+//        CoordinatorStore store3 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store3.beginTrx();
+//        CoordinatorActionBean action3 = store3.getCoordinatorAction(actionId, false);
+//        String actionXml = action3.getActionXml();
+//        System.out.println("After refresh, action xml= " + actionXml);
+//
+//        Element eAction = XmlUtils.parseXml(actionXml);
+//        String[] urls = getActionXmlUrls(eAction, getTestUser(), getTestGroup());
+//        store3.commitTrx();
+//        store3.closeTrx();
+//
+//        if (urls != null) {
+//            assertEquals(inputDir, urls[0]);
+//        }
+//        else {
+//            fail("After refresh, latest() should get the inputDir:" + inputDir);
+//        }
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -action 1
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunCleanup() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//        Path appPath = new Path(getFsTestCaseDir(), "coord");
+//        String outputDir = appPath.toString() + "/coord-input/2009/12/14/11/00";
+//        Path success = new Path(outputDir, "_SUCCESS");
+//        FileSystem fs = getFileSystem();
+//        fs.mkdirs(new Path(outputDir));
+//        fs.create(success, true);
+//        // before cleanup
+//        assertTrue(fs.exists(success));
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, false);
+//
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//
+//        waitFor(120 * 1000, new Predicate() {
+//            public boolean evaluate() throws Exception {
+//                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
+//                return (bean.getStatus() == CoordinatorAction.Status.WAITING || bean.getStatus() == CoordinatorAction.Status.READY);
+//            }
+//        });
+//
+//        // after cleanup
+//        assertFalse(fs.exists(success));
+//    }
+//
+//    /**
+//     * Test : rerun <jobId> -action 1 with no output-event
+//     * 
+//     * @throws Exception
+//     */
+//    public void testCoordRerunCleanupNoOutputEvents() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.SUCCEEDED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action3.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        final OozieClient coordClient = LocalOozie.getCoordClient();
+//        coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false, false);
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertNotSame(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//        waitFor(120 * 1000, new Predicate() {
+//            public boolean evaluate() throws Exception {
+//                CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
+//                return (bean.getStatus() == CoordinatorAction.Status.WAITING || bean.getStatus() == CoordinatorAction.Status.READY);
+//            }
+//        });
+//        CoordinatorAction bean = coordClient.getCoordActionInfo(actionId);
+//        assertTrue(bean.getStatus() == CoordinatorAction.Status.WAITING
+//                || bean.getStatus() == CoordinatorAction.Status.READY);
+//    }
+//
+// /**
+//     * Negative Test : rerun <jobId> -action 1 -nocleanup.
+//     * Coordiantor job is killed, so no actions are able to rerun.
+//     *
+//     * @throws Exception
+//     */
+//    public void testCoordRerunNeg() throws Exception {
+//        final String jobId = "0000000-" + new Date().getTime() + "-testCoordRerun-C";
+//        final int actionNum = 1;
+//        final String actionId = jobId + "@" + actionNum;
+//        CoordinatorStore store = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store.beginTrx();
+//        try {
+//            addRecordToJobTable(jobId, store, CoordinatorJob.Status.KILLED);
+//            addRecordToActionTable(jobId, actionNum, actionId, store, CoordinatorAction.Status.SUCCEEDED,
+//                    "coord-rerun-action1.xml");
+//            store.commitTrx();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            fail("Could not update db.");
+//        }
+//        finally {
+//            store.closeTrx();
+//        }
+//
+//        try {
+//            final OozieClient coordClient = LocalOozie.getCoordClient();
+//            coordClient.reRunCoord(jobId, RestConstants.JOB_COORD_RERUN_ACTION, Integer.toString(actionNum), false,
+//                    true);
+//            fail("Exception expected because action is not in terminal state.");
+//        }
+//        catch (OozieClientException ex) {
+//            if (!ex.getErrorCode().equals(ErrorCode.E1018.toString())) {
+//                fail("Error code should be E1018 when job is killed or failed.");
+//            }
+//        }
+//
+//        CoordinatorStore store2 = Services.get().get(StoreService.class).getStore(CoordinatorStore.class);
+//        store2.beginTrx();
+//        CoordinatorActionBean action2 = store2.getCoordinatorAction(actionId, false);
+//        assertEquals(action2.getStatus(), CoordinatorAction.Status.SUCCEEDED);
+//        store2.commitTrx();
+//        store2.closeTrx();
+//    }
 
     private void addRecordToJobTable(String jobId, CoordinatorStore store, CoordinatorJob.Status status)
             throws StoreException,

@@ -27,6 +27,7 @@ import org.apache.oozie.CoordinatorActionInfo;
 import org.apache.oozie.CoordinatorEngine;
 import org.apache.oozie.CoordinatorEngineException;
 import org.apache.oozie.CoordinatorJobBean;
+import org.apache.oozie.CoordinatorXEngine;
 import org.apache.oozie.ErrorCode;
 import org.apache.oozie.XException;
 import org.apache.oozie.client.CoordinatorAction;
@@ -67,16 +68,16 @@ public class MockCoordinatorEngineService extends CoordinatorEngineService {
     }
 
     @Override
-    public CoordinatorEngine getCoordinatorEngine(String user, String authToken) {
+    public CoordinatorXEngine getCoordinatorEngine(String user, String authToken) {
         return new MockCoordinatorEngine(user, authToken);
     }
 
     @Override
-    public CoordinatorEngine getSystemCoordinatorEngine() {
+    public CoordinatorXEngine getSystemCoordinatorEngine() {
         return new MockCoordinatorEngine();
     }
 
-    private static class MockCoordinatorEngine extends CoordinatorEngine {
+    private static class MockCoordinatorEngine extends CoordinatorXEngine {
 
         public MockCoordinatorEngine() {
         }
