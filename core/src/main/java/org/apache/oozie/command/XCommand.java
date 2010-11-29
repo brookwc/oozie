@@ -17,6 +17,7 @@ package org.apache.oozie.command;
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.ErrorCode;
+import org.apache.oozie.FaultInjection;
 import org.apache.oozie.WorkflowActionBean;
 import org.apache.oozie.WorkflowJobBean;
 import org.apache.oozie.XException;
@@ -300,6 +301,7 @@ public abstract class XCommand<T> implements XCallable<T> {
             throw new CommandException(ErrorCode.E0607, ex);
         }
         finally {
+            FaultInjection.deactivate("org.apache.oozie.command.SkipCommitFaultInjection");
             callCron.stop();
             instrumentation.addCron(INSTRUMENTATION_GROUP, getName() + ".call", callCron);
         }
