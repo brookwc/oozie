@@ -74,7 +74,7 @@ public class SubWorkflowActionExecutor extends ActionExecutor {
             String user = workflow.getUser();
             String group = workflow.getGroup();
             String authToken = workflow.getAuthToken();
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(user, authToken);
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(user, authToken);
             oozieClient = new LocalOozieClient(dagEngine);
         }
         else {

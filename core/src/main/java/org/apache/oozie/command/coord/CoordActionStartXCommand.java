@@ -146,7 +146,7 @@ public class CoordActionStartXCommand extends CoordinatorXCommand<Void> {
             coordAction.setRunConf(XmlUtils.prettyPrint(runConf).toString());
             // log.debug("%%% merged runconf=" +
             // XmlUtils.prettyPrint(runConf).toString());
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(user, authToken);
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(user, authToken);
             try {
                 boolean startJob = true;
                 Configuration conf = new XConfiguration(new StringReader(coordAction.getRunConf()));

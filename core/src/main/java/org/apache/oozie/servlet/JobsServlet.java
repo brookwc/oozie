@@ -87,7 +87,7 @@ public class JobsServlet extends JsonRestServlet {
         try {
             boolean startJob = (action != null);
             String user = conf.get(OozieClient.USER_NAME);
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(user, getAuthToken(request));
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(user, getAuthToken(request));
             String id = dagEngine.submitJob(conf, startJob);
             JSONObject json = new JSONObject();
             json.put(JsonTags.JOB_ID, id);
@@ -126,7 +126,7 @@ public class JobsServlet extends JsonRestServlet {
             if (externalId != null) {
                 stopCron();
                 DagXEngine dagEngine = Services.get().get(DagEngineService.class)
-                        .getDagEngine(getUser(request), getAuthToken(request));
+                        .getDagXEngine(getUser(request), getAuthToken(request));
                 String jobId = dagEngine.getJobIdForExternalId(externalId);
                 JSONObject json = new JSONObject();
                 json.put(JsonTags.JOB_ID, jobId);
@@ -143,7 +143,7 @@ public class JobsServlet extends JsonRestServlet {
                 len = (len < 1) ? 50 : len;
                 stopCron();
                 DagXEngine dagEngine = Services.get().get(DagEngineService.class)
-                        .getDagEngine(getUser(request), getAuthToken(request));
+                        .getDagXEngine(getUser(request), getAuthToken(request));
                 WorkflowsInfo jobs = dagEngine.getJobs(filter, start, len);
                 List<WorkflowJobBean> jsonWorkflows = jobs.getWorkflows();
                 startCron();

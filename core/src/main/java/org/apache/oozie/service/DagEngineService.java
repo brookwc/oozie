@@ -54,7 +54,18 @@ public class DagEngineService implements Service {
      * @param authToken the authentication token.
      * @return the dag engine for the specified user.
      */
-    public DagXEngine getDagEngine(String user, String authToken) {
+    public DagEngine getDagEngine(String user, String authToken) {
+        return new DagEngine(user, authToken);
+    }
+    
+    /**
+     * Return a Dag X engine.
+     *
+     * @param user user for the dag engine.
+     * @param authToken the authentication token.
+     * @return the dag X engine for the specified user.
+     */
+    public DagXEngine getDagXEngine(String user, String authToken) {
         return new DagXEngine(user, authToken);
     }
 
@@ -63,7 +74,16 @@ public class DagEngineService implements Service {
      *
      * @return a system Dag engine.
      */
-    public DagXEngine getSystemDagEngine() {
+    public DagEngine getSystemDagEngine() {
+        return new DagEngine();
+    }
+    
+    /**
+     * Return a Dag X engine for a system user (no user, no group).
+     *
+     * @return a system Dag X engine.
+     */
+    public DagXEngine getSystemDagXEngine() {
         return new DagXEngine();
     }
 

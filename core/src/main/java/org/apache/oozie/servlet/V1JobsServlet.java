@@ -150,7 +150,7 @@ public class V1JobsServlet extends BaseJobsServlet {
             }
             boolean startJob = (action != null);
             String user = conf.get(OozieClient.USER_NAME);
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(user, getAuthToken(request));
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(user, getAuthToken(request));
             String id = dagEngine.submitJob(conf, startJob);
             json.put(JsonTags.JOB_ID, id);
         }
@@ -177,7 +177,7 @@ public class V1JobsServlet extends BaseJobsServlet {
             }
             boolean startJob = (action != null);
             String user = conf.get(OozieClient.USER_NAME);
-            CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorEngine(
+            CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorXEngine(
                     user, getAuthToken(request));
             String id = null;
             boolean dryrun = false;
@@ -206,7 +206,7 @@ public class V1JobsServlet extends BaseJobsServlet {
     throws XServletException {
         JSONObject json = new JSONObject();
         try {
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(getUser(request),
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(getUser(request),
                     getAuthToken(request));
             String jobId = dagEngine.getJobIdForExternalId(externalId);
             json.put(JsonTags.JOB_ID, jobId);
@@ -241,7 +241,7 @@ public class V1JobsServlet extends BaseJobsServlet {
             start = (start < 1) ? 1 : start;
             int len = (lenStr != null) ? Integer.parseInt(lenStr) : 50;
             len = (len < 1) ? 50 : len;
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(getUser(request),
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(getUser(request),
                     getAuthToken(request));
             WorkflowsInfo jobs = dagEngine.getJobs(filter, start, len);
             List<WorkflowJobBean> jsonWorkflows = jobs.getWorkflows();
@@ -273,7 +273,7 @@ public class V1JobsServlet extends BaseJobsServlet {
             start = (start < 1) ? 1 : start;
             int len = (lenStr != null) ? Integer.parseInt(lenStr) : 50;
             len = (len < 1) ? 50 : len;
-            CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorEngine(
+            CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorXEngine(
                     getUser(request), getAuthToken(request));
             CoordinatorJobInfo jobs = coordEngine.getCoordJobs(filter, start, len);
             List<CoordinatorJobBean> jsonJobs = jobs.getCoordJobs();
@@ -297,7 +297,7 @@ public class V1JobsServlet extends BaseJobsServlet {
 
         try {
             String user = conf.get(OozieClient.USER_NAME);
-            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(user, getAuthToken(request));
+            DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(user, getAuthToken(request));
             String id = dagEngine.submitHttpJob(conf, jobType);
             json.put(JsonTags.JOB_ID, id);
         }

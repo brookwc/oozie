@@ -77,9 +77,9 @@ public class JobServlet extends JsonRestServlet {
             throw new XServletException(HttpServletResponse.SC_UNAUTHORIZED, ex);
         }
 
-        DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(getUser(request),
+        DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(getUser(request),
                                                                                       getAuthToken(request));
-        CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorEngine(
+        CoordinatorXEngine coordEngine = Services.get().get(CoordinatorEngineService.class).getCoordinatorXEngine(
                 getUser(request), getAuthToken(request));
         try {
             String action = request.getParameter(RestConstants.ACTION_PARAM);
@@ -197,7 +197,7 @@ public class JobServlet extends JsonRestServlet {
             throw new XServletException(HttpServletResponse.SC_UNAUTHORIZED, ex);
         }
 
-        DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagEngine(getUser(request),
+        DagXEngine dagEngine = Services.get().get(DagEngineService.class).getDagXEngine(getUser(request),
                                                                                       getAuthToken(request));
         try {
             if (show == null || show.equals(RestConstants.JOB_SHOW_INFO)) {

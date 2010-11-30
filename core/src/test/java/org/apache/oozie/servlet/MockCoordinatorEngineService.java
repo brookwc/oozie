@@ -68,12 +68,12 @@ public class MockCoordinatorEngineService extends CoordinatorEngineService {
     }
 
     @Override
-    public CoordinatorXEngine getCoordinatorEngine(String user, String authToken) {
+    public CoordinatorXEngine getCoordinatorXEngine(String user, String authToken) {
         return new MockCoordinatorEngine(user, authToken);
     }
 
     @Override
-    public CoordinatorXEngine getSystemCoordinatorEngine() {
+    public CoordinatorXEngine getSystemCoordinatorXEngine() {
         return new MockCoordinatorEngine();
     }
 

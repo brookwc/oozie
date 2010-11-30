@@ -68,12 +68,12 @@ public class MockDagEngineService extends DagEngineService {
     }
 
     @Override
-    public DagXEngine getSystemDagEngine() {
+    public DagXEngine getSystemDagXEngine() {
         return new MockDagEngine();
     }
 
     @Override
-    public DagXEngine getDagEngine(String user, String authToken) {
+    public DagXEngine getDagXEngine(String user, String authToken) {
         return new MockDagEngine(user, authToken);
     }
 

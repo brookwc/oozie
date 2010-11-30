@@ -89,9 +89,6 @@ public class TestActionFailover extends XFsTestCase {
             }
         });
         
-        //XXX
-        System.out.println("isactive = " + FaultInjection.isActive("org.apache.oozie.command.SkipCommitFaultInjection"));
-                
         assertFalse(FaultInjection.isActive("org.apache.oozie.command.SkipCommitFaultInjection"));
 
         assertEquals(WorkflowJob.Status.RUNNING, wfClient.getJobInfo(jobId1).getStatus());
