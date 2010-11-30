@@ -273,9 +273,6 @@ public class TestCoordRerunCommand extends XFsTestCase {
             fail("Exception expected because action is not in terminal state.");
         }
         catch (OozieClientException ex) {
-            //XXX
-            System.out.println("errorcode = " + ex.getErrorCode());
-            
             if (!ex.getErrorCode().equals(ErrorCode.E1018.toString())) {
                 fail("Error code should be E1018 when action is not in terminal state.");
             }
