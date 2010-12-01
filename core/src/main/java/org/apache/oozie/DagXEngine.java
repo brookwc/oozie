@@ -21,38 +21,26 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.WorkflowJob;
 import org.apache.oozie.client.OozieClient;
-import org.apache.oozie.command.wf.CompletedActionCommand;
 import org.apache.oozie.command.CommandException;
-import org.apache.oozie.command.Command;
 import org.apache.oozie.command.XCommand;
 import org.apache.oozie.command.wf.CompletedActionXCommand;
 import org.apache.oozie.command.wf.JobCommand;
 import org.apache.oozie.command.wf.JobsCommand;
 import org.apache.oozie.command.wf.KillCommand;
-import org.apache.oozie.command.wf.ReRunCommand;
 import org.apache.oozie.command.wf.ReRunXCommand;
-import org.apache.oozie.command.wf.ResumeCommand;
 import org.apache.oozie.command.wf.ResumeXCommand;
 import org.apache.oozie.command.wf.StartXCommand;
-import org.apache.oozie.command.wf.SubmitCommand;
-import org.apache.oozie.command.wf.SubmitHttpCommand;
 import org.apache.oozie.command.wf.SubmitHttpXCommand;
 import org.apache.oozie.command.wf.SubmitMRXCommand;
-import org.apache.oozie.command.wf.SubmitPigCommand;
-import org.apache.oozie.command.wf.SubmitMRCommand;
-import org.apache.oozie.command.wf.StartCommand;
 import org.apache.oozie.command.wf.SubmitPigXCommand;
 import org.apache.oozie.command.wf.SubmitXCommand;
-import org.apache.oozie.command.wf.SuspendCommand;
 import org.apache.oozie.command.wf.DefinitionCommand;
 import org.apache.oozie.command.wf.ExternalIdCommand;
 import org.apache.oozie.command.wf.SuspendXCommand;
-import org.apache.oozie.command.wf.WorkflowActionInfoCommand;
 import org.apache.oozie.command.wf.WorkflowActionInfoXCommand;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.service.CallableQueueService;
 import org.apache.oozie.util.ParamChecker;
-import org.apache.oozie.util.XConfiguration;
 import org.apache.oozie.util.XLog;
 
 import java.io.Writer;
@@ -67,7 +55,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 /**
- * The DagEngine bean provides all the DAG engine functionality for WS calls.
+ * The DagXEngine provides all the DAG engine functionality for WS calls using refactored commands.
  */
 public class DagXEngine extends BaseEngine {
 
@@ -142,34 +130,6 @@ public class DagXEngine extends BaseEngine {
         }
         catch (CommandException ex) {
             throw new DagEngineException(ex);
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-        // Configuration conf = new XConfiguration(IOUtils.getResourceAsReader(
-        // "org/apache/oozie/coord/conf.xml", -1));
-
-        Configuration conf = new XConfiguration();
-
-        // String appXml =
-        // IOUtils.getResourceAsString("org/apache/oozie/coord/test1.xml", -1);
-        conf.set(OozieClient.APP_PATH, "file:///Users/danielwo/oozie/workflows/examples/seed/workflows/map-reduce");
-        conf.set(OozieClient.USER_NAME, "danielwo");
-        conf.set(OozieClient.GROUP_NAME, "other");
-
-        conf.set("inputDir", "  blah   ");
-
-        // System.out.println("appXml :"+ appXml + "\n conf :"+ conf);
-        new Services().init();
-        try {
-            DagXEngine de = new DagXEngine("me", "TESTING_WF");
-            String jobId = de.submitJob(conf, true);
-            System.out.println("WF Job Id " + jobId);
-
-            Thread.sleep(20000);
-        }
-        finally {
-            Services.get().destroy();
         }
     }
 
@@ -444,7 +404,6 @@ public class DagXEngine extends BaseEngine {
      * @return job info for all matching jobs, the jobs don't contain node action information.
      * @throws DagEngineException thrown if the jobs info could not be obtained.
      */
-    @SuppressWarnings("unchecked")
     public WorkflowsInfo getJobs(String filterStr, int start, int len) throws DagEngineException {
         Map<String, List<String>> filter = parseFilter(filterStr);
         try {

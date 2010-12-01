@@ -25,7 +25,6 @@ import org.apache.oozie.CoordinatorEngineException;
 import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.CoordinatorJobInfo;
 import org.apache.oozie.CoordinatorXEngine;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagEngineException;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.ErrorCode;

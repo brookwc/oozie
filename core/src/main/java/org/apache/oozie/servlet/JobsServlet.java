@@ -22,7 +22,6 @@ import org.apache.oozie.util.XConfiguration;
 import org.apache.oozie.service.Services;
 import org.apache.oozie.service.DagEngineService;
 import org.apache.oozie.service.WorkflowAppService;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagEngineException;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.WorkflowsInfo;

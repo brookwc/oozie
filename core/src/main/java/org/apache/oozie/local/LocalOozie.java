@@ -14,9 +14,7 @@
  */
 package org.apache.oozie.local;
 
-import org.apache.oozie.CoordinatorEngine;
 import org.apache.oozie.CoordinatorXEngine;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.LocalOozieClient;
 import org.apache.oozie.LocalOozieClientCoord;

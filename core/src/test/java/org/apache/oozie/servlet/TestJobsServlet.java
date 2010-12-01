@@ -19,7 +19,6 @@ import org.apache.oozie.service.AuthorizationService;
 import java.io.StringReader;
 
 import org.apache.oozie.service.DagEngineService;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.servlet.V0JobsServlet;
 import org.apache.oozie.service.Services;

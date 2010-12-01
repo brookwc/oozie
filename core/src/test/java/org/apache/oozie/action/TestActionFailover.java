@@ -76,7 +76,7 @@ public class TestActionFailover extends XFsTestCase {
         final String jobId1 = wfClient.submit(conf);
         wfClient.start(jobId1);
 
-        waitFor(20 * 1000, new Predicate() {
+        waitFor(10 * 1000, new Predicate() {
             public boolean evaluate() throws Exception {
                 return getFileSystem().exists(target);
             }
@@ -88,7 +88,6 @@ public class TestActionFailover extends XFsTestCase {
                 return FaultInjection.isActive("org.apache.oozie.command.SkipCommitFaultInjection");
             }
         });
-        
         assertFalse(FaultInjection.isActive("org.apache.oozie.command.SkipCommitFaultInjection"));
 
         assertEquals(WorkflowJob.Status.RUNNING, wfClient.getJobInfo(jobId1).getStatus());

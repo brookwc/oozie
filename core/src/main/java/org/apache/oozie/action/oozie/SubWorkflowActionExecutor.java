@@ -17,7 +17,6 @@ package org.apache.oozie.action.oozie;
 import org.apache.oozie.client.OozieClientException;
 import org.apache.oozie.action.ActionExecutor;
 import org.apache.oozie.action.ActionExecutorException;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.LocalOozieClient;
 import org.apache.oozie.WorkflowJobBean;

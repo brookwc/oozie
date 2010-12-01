@@ -27,7 +27,6 @@ import org.apache.oozie.BaseEngineException;
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.CoordinatorActionInfo;
 import org.apache.oozie.CoordinatorXEngine;
-import org.apache.oozie.DagEngine;
 import org.apache.oozie.DagEngineException;
 import org.apache.oozie.DagXEngine;
 import org.apache.oozie.ErrorCode;

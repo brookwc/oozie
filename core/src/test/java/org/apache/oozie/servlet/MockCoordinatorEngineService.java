@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.BaseEngineException;
 import org.apache.oozie.CoordinatorActionBean;
 import org.apache.oozie.CoordinatorActionInfo;
-import org.apache.oozie.CoordinatorEngine;
 import org.apache.oozie.CoordinatorEngineException;
 import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.CoordinatorXEngine;
