@@ -69,7 +69,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 /**
- * The DagXEngine provides all the DAG engine functionality for WS calls using refactored commands.
+ * The DagEngine provides all the DAG engine functionality for WS calls.
  */
 public class DagEngine extends BaseEngine {
 
