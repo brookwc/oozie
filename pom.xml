@@ -29,6 +29,12 @@
         </license>
     </licenses>
 
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>6</version>
+  </parent>
+
     <organization>
         <name>Yahoo</name>
         <url>http://www.yahoo.com</url>
@@ -36,8 +42,32 @@
 
     <scm>
         <connection>scm:git:git://github.com/yahoo/oozie.git</connection>
+    		<developerConnection>scm:git:git://github.com/yahoo/oozie.git</developerConnection>
         <url>https://github.com/yahoo/oozie</url>
     </scm>
+
+		<developers>
+   		 <developer>
+      		<id>mislam77</id>
+      		<name>Mohammad Kamrul Islam</name>
+      		<email>mislam77@yahoo.com</email>
+    	</developer>
+   		 <developer>
+      		<id>angelokh</id>
+      		<name>Angelo Kaichen Huang</name>
+      		<email>angelokh@ymail.com</email>
+    	</developer>
+   		 <developer>
+      		<id>brookwc</id>
+      		<name>Chao Wang</name>
+      		<email>brookwc@gmail.com</email>
+    	</developer>
+   		 <developer>
+      		<id>bansalmayank</id>
+      		<name>Mayank Bansal</name>
+      		<email>mabansal@gmail.com</email>
+    	</developer>
+	  </developers>
 
     <properties>
         <!-- to be able to run a single test case from the main project -->
@@ -61,15 +91,18 @@
         <module>distro</module>
     </modules>
 
+<!--
     <distributionManagement>
         <repository>
             <id>internal.maven.repo</id>
             <name>Internal Repository for Integration</name>
             <url>${internal.maven.repository}</url>
-        </repository>
+        </repository> 
     </distributionManagement>
+-->
 
     <repositories>
+<!--
         <repository>
             <id>internal.maven.repo</id>
             <name>Internal Repository for Integration</name>
@@ -77,21 +110,24 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
+        </repository> 
+
         <repository>
             <id>central</id>
             <url>http://repo1.maven.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository> 
+
         <repository>
             <id>Codehaus repository</id>
             <url>http://repository.codehaus.org/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository> -->
+
         <repository>
             <id>yahoo.github</id>
             <url>http://yahoo.github.com/maven/repository</url>
@@ -101,6 +137,7 @@
         </repository>
     </repositories>
 
+<!--
     <pluginRepositories>
         <pluginRepository>
             <id>internal.maven.repo</id>
@@ -118,6 +155,7 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+-->
 
     <dependencyManagement>
         <dependencies>
@@ -276,15 +314,10 @@
 
             <dependency>
                 <!-- groupId to be correct by GH-0226 -->
-                <groupId>com.yahoo.hadoop</groupId>
+                <groupId>org.apache.pig</groupId>
                 <artifactId>pig</artifactId>
-                <version>0.7.0</version>
+                <version>0.8.0</version>
                 <exclusions>
-                    <exclusion>
-                        <!-- groupId to be correct by GH-0226 -->
-                        <groupId>com.yahoo.hadoop</groupId>
-                        <artifactId>hadoop-core</artifactId>
-                    </exclusion>
                     <!-- this exclusion to be removed by GH-0226 -->
                     <exclusion>
                         <groupId>org.apache.hadoop</groupId>
