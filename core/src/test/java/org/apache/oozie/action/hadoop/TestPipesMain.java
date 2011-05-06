@@ -52,7 +52,7 @@ public class TestPipesMain extends MainTestCase {
         if (System.getProperty("os.name").startsWith("Linux") && System.getProperty("os.arch").equals("amd64")) {
             osSuffix = "Linux-amd64-64";
         }
-        if (System.getProperty("os.name").startsWith("Linux") && System.getProperty("os.arch").equals("i386")) {
+        if (System.getProperty("os.name").startsWith("Linux") && (System.getProperty("os.arch").equals("i386") || System.getProperty("os.arch").equals("x86"))) {
             osSuffix = "Linux-i386-32";
         }
         if (osSuffix == null) {
