@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.yahoo.oozie</groupId>
+    <artifactId>oozie-main</artifactId>
+    <version>2.2.2-SNAPSHOT</version> <!-- OOZIE_VERSION -->
+    <description>Oozie Main</description>
+    <name>Oozie Main</name>
+    <packaging>pom</packaging>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Yahoo</name>
+        <url>http://www.yahoo.com</url>
+    </organization>
+    
+    <properties>
+        <!-- to be able to run a single test case from the main project -->
+        <failIfNoTests>false</failIfNoTests>
+
+        <hadoop20>false</hadoop20>
+
+        <hadoopGroupId>com.yahoo.hadoop</hadoopGroupId>
+
+        <hadoopVersion>0.20.104.1</hadoopVersion>
+
+        <pigGroupId>com.yahoo.hadoop</pigGroupId>
+
+        <pigVersion>0.7.0</pigVersion>
+
+        <oozie.test.config.file></oozie.test.config.file>
+
+        <oozie.test.dir>/tmp</oozie.test.dir>
+
+        <oozie.test.job.tracker>localhost:9001</oozie.test.job.tracker>
+
+        <oozie.test.name.node>hdfs://localhost:9000</oozie.test.name.node>
+
+        <oozie.test.hadoop.minicluster>true</oozie.test.hadoop.minicluster>
+        <hadoop.log.dir>/tmp</hadoop.log.dir>
+
+        <oozie.test.hadoop.pipes>false</oozie.test.hadoop.pipes>
+
+        <oozie.test.hadoop.security>simple</oozie.test.hadoop.security>
+
+        <oozie.test.kerberos.keytab.file>${user.home}/oozie.keytab</oozie.test.kerberos.keytab.file>
+        <oozie.test.kerberos.realm>LOCALHOST</oozie.test.kerberos.realm>
+        <oozie.test.kerberos.oozie.principal>${user.name}/localhost</oozie.test.kerberos.oozie.principal>
+        <oozie.test.kerberos.jobtracker.principal>mapred/localhost</oozie.test.kerberos.jobtracker.principal>
+        <oozie.test.kerberos.namenode.principal>hdfs/localhost</oozie.test.kerberos.namenode.principal>
+
+        <internal.maven.repository>file:///tmp/internalmavenrepo</internal.maven.repository>
+    </properties>
+
+    <modules>
+        <module>client</module>
+        <module>core</module>
+        <module>webapp</module>
+        <module>examples</module>
+        <module>docs</module>
+        <module>distro</module>
+    </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>internal.maven.repo</id>
+            <name>Internal Repository for Integration</name>
+            <url>${internal.maven.repository}</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>Codehaus repository</id>
+            <url>http://repository.codehaus.org/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>yahoo.github</id>
+            <url>http://yahoo.github.com/maven/repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+      <pluginRepository>
+          <id>internal.maven.repo</id>
+          <name>Internal Repository for Integration</name>
+          <url>${internal.maven.repository}</url>
+          <snapshots>
+              <enabled>true</enabled>
+          </snapshots>
+      </pluginRepository>
+        <pluginRepository>
+            <id>yahoo.github</id>
+            <url>http://yahoo.github.com/maven/repository</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkMode>once</forkMode>
+                    <argLine>-Xmx1024m</argLine>
+                    <systemProperties>
+                        <property>
+                            <name>oozie.test.config.file</name>
+                            <value>${oozie.test.config.file}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.dir</name>
+                            <value>${oozie.test.dir}</value>
+                        </property>
+                        <property>
+                            <name>hadoop20</name>
+                            <value>${hadoop20}</value>
+                        </property>
+                        <property>
+                            <name>hadoop.version</name>
+                            <value>${hadoopVersion}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.job.tracker</name>
+                            <value>${oozie.test.job.tracker}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.name.node</name>
+                            <value>${oozie.test.name.node}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.kerberos.keytab.file</name>
+                            <value>${oozie.test.kerberos.keytab.file}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.kerberos.realm</name>
+                            <value>${oozie.test.kerberos.realm}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.kerberos.oozie.principal</name>
+                            <value>${oozie.test.kerberos.oozie.principal}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.kerberos.jobtracker.principal</name>
+                            <value>${oozie.test.kerberos.jobtracker.principal}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.kerberos.namenode.principal</name>
+                            <value>${oozie.test.kerberos.namenode.principal}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.hadoop.minicluster</name>
+                            <value>${oozie.test.hadoop.minicluster}</value>
+                        </property>
+                        <property>
+                            <name>hadoop.log.dir</name>
+                            <value>${hadoop.log.dir}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.hadoop.security</name>
+                            <value>${oozie.test.hadoop.security}</value>
+                        </property>
+                        <property>
+                            <name>oozie.test.hadoop.pipes</name>
+                            <value>${oozie.test.hadoop.pipes}</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-3</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assemblies/empty.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+            <!-- ADDITIONAL PLUGINS -->
+        </plugins>
+    </build>
+
+</project>

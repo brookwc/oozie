@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.yahoo.oozie</groupId>
+        <artifactId>oozie-main</artifactId>
+        <version>2.2.2-SNAPSHOT</version> <!-- OOZIE_VERSION -->
+    </parent>
+    <artifactId>oozie-examples</artifactId>
+    <description>Oozie Examples</description>
+    <name>Oozie Examples</name>
+    <packaging>jar</packaging>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Yahoo</name>
+        <url>http://www.yahoo.com</url>
+    </organization>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.yahoo.oozie</groupId>
+            <artifactId>oozie-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.yahoo.oozie</groupId>
+            <artifactId>oozie-client</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${hadoopGroupId}</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoopVersion}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-cli</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${hadoopGroupId}</groupId>
+            <artifactId>hadoop-streaming</artifactId>
+            <version>${hadoopVersion}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>${hadoopGroupId}</groupId>
+                    <artifactId>hadoop-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${pigGroupId}</groupId>
+            <artifactId>pig</artifactId>
+            <version>${pigVersion}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>${hadoopGroupId}</groupId>
+                    <artifactId>hadoop-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${hadoopGroupId}</groupId>
+            <artifactId>hadoop-test</artifactId>
+            <version>${hadoopVersion}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-cli</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-log4j12</artifactId>
+           <version>1.4.3</version>
+           <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>../src/main/assemblies/examples.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Kerberos Authentication -->
+        <profile>
+            <id>hadoopSecurityKerberos</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>oozie.test.hadoop.auth</name>
+                    <value>kerberos</value>
+                </property>
+            </activation>
+            <build>
+               <plugins>
+                 <plugin>
+                   <groupId>org.apache.maven.plugins</groupId>
+                   <artifactId>maven-surefire-plugin</artifactId>
+                   <configuration>
+                     <excludes>
+                       <exclude>**/*.java</exclude>
+                     </excludes>
+                   </configuration>
+                 </plugin>
+               </plugins>
+             </build>
+        </profile>
+    </profiles>
+
+</project>
+
