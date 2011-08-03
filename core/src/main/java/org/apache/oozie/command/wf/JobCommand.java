@@ -114,23 +114,19 @@ public class JobCommand extends WorkflowCommand<WorkflowJobBean> {
                     try {
                         String externalId = action.getExternalId();
                         String trackerUri = action.getTrackerUri();
-                        
-                        XLog.getLog(JobCommand.class).info("externalId = " + externalId + "; trackerUri = " + trackerUri);
-                        
                         JobConf conf = new JobConf();
-                        conf.set("mapred.job.tracker","svlhdev04.svl.ibm.com:9001");
+                        conf.set("mapred.job.tracker", trackerUri);
                         JobID id = JobID.forName(externalId);
                         JobClient jobClient = new JobClient(conf);
                         RunningJob job = jobClient.getJob(id);
-                        XLog.getLog(JobCommand.class).info("runningjob = " + job.toString());
+
                         float mapProgress = job.mapProgress();
                         float reduceProgress = job.reduceProgress();
+                        // For now simply take an average of map and reduce progress
                         float overallProgress = (mapProgress + reduceProgress) / 2.0f;
-                        XLog.getLog(JobCommand.class).info("mapProgress = " + mapProgress + "; reduceProgress = " + reduceProgress
-                                + "; overallProgress = " + overallProgress);
                         doneActions += overallProgress / executionPathLengthEstimate;
                     }
-                    catch (IOException ex) {
+                    catch (Exception ex) {
                         // noop
                     }
                 }
