@@ -14,8 +14,13 @@
  */
 package org.apache.oozie.command.wf;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobID;
+import org.apache.hadoop.mapred.RunningJob;
 import org.apache.oozie.WorkflowJobBean;
 import org.apache.oozie.action.decision.DecisionActionExecutor;
 import org.apache.oozie.client.WorkflowAction;
@@ -94,17 +99,44 @@ public class JobCommand extends WorkflowCommand<WorkflowJobBean> {
             return 1.0f;
         }
         List<WorkflowAction> actions = wf.getActions();
-        int doneActions = 0;
+        float doneActions = 0;
         for (WorkflowAction action : actions) {
             // Skip decision nodes, note start, kill, end, fork/join will not have action entry.
             if (action.getType().equals(DecisionActionExecutor.ACTION_TYPE)) {
                 continue;
             }
             if (action.getStatus() == WorkflowAction.Status.OK || action.getStatus() == WorkflowAction.Status.DONE) {
-                doneActions++;
+                doneActions = doneActions + 1.0f;
+            }
+            else if (action.getStatus() == WorkflowAction.Status.RUNNING) {
+                // Incorporate m/r job progress info if it's m/r action.
+                if (action.getType().equals("map-reduce")) {
+                    try {
+                        String externalId = action.getExternalId();
+                        String trackerUri = action.getTrackerUri();
+                        
+                        XLog.getLog(JobCommand.class).info("externalId = " + externalId + "; trackerUri = " + trackerUri);
+                        
+                        JobConf conf = new JobConf();
+                        conf.set("mapred.job.tracker","svlhdev04.svl.ibm.com:9001");
+                        JobID id = JobID.forName(externalId);
+                        JobClient jobClient = new JobClient(conf);
+                        RunningJob job = jobClient.getJob(id);
+                        XLog.getLog(JobCommand.class).info("runningjob = " + job.toString());
+                        float mapProgress = job.mapProgress();
+                        float reduceProgress = job.reduceProgress();
+                        float overallProgress = (mapProgress + reduceProgress) / 2.0f;
+                        XLog.getLog(JobCommand.class).info("mapProgress = " + mapProgress + "; reduceProgress = " + reduceProgress
+                                + "; overallProgress = " + overallProgress);
+                        doneActions += overallProgress / executionPathLengthEstimate;
+                    }
+                    catch (IOException ex) {
+                        // noop
+                    }
+                }
             }
         }
 
-        return (doneActions * 1.0f) / executionPathLengthEstimate;
+        return doneActions / executionPathLengthEstimate;
     }
 }
