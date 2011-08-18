@@ -57,7 +57,7 @@ public class TestLocalOozieExample extends TestCase {
         conf.set(WorkflowAppService.HADOOP_JT_KERBEROS_NAME, jtKerberosPrincipal);
         conf.set(WorkflowAppService.HADOOP_NN_KERBEROS_NAME, nnKerberosPrincipal);
 
-// TODO restore this when getting rid of DoAs trick
+        // TODO restore this when getting rid of DoAs trick
 
 //        if (System.getProperty("oozie.test.kerberos", "off").equals("on")) {
 //            Configuration c = new Configuration();

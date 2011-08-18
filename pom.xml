@@ -111,6 +111,24 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+
+        <repository>
+            <id>cdh.thirdparty.repo</id>
+            <url>https://repository.cloudera.com/content/repositories/third-party</url>
+            <name>Cloudera Third Party Repository</name>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>cdh.snapshots.repo</id>
+            <url>https://repository.cloudera.com/content/repositories/snapshots</url>
+            <name>Cloudera Snapshots Repository</name>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
     </repositories>
 
     <pluginRepositories>
@@ -140,6 +158,8 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <!-- This switches off DataNucleus enhancer which is ON by default -->
+                    <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
