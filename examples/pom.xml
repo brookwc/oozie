@@ -44,6 +44,7 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.yahoo.oozie</groupId>
             <artifactId>oozie-client</artifactId>
