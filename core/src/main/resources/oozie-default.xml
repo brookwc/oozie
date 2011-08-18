@@ -67,7 +67,7 @@
             org.apache.oozie.service.UUIDService,
             org.apache.oozie.service.ELService,
             org.apache.oozie.service.AuthorizationService,
-            org.apache.oozie.service.KerberosHadoopAccessorService,
+            org.apache.oozie.service.HadoopAccessorService,
             org.apache.oozie.service.MemoryLocksService,
             org.apache.oozie.service.DagXLogInfoService,
             org.apache.oozie.service.SchemaService,
@@ -884,7 +884,7 @@
 
     <property>
         <name>oozie.service.StoreService.jdbc.driver</name>
-        <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+        <value>org.hsqldb.jdbcDriver</value>
         <description>
             JDBC driver class.
         </description>
@@ -892,7 +892,7 @@
 
     <property>
         <name>oozie.service.StoreService.jdbc.url</name>
-        <value>jdbc:derby:${oozie.data.dir}/${oozie.db.schema.name}-db;create=true</value>
+        <value>jdbc:hsqldb:mem:${oozie.db.schema.name};create=true</value>
         <description>
             JDBC URL.
         </description>
@@ -1116,14 +1116,6 @@
     </property>
 
     <property>
-        <name>local.realm</name>
-        <value>LOCALHOST</value>
-        <description>
-            Kerberos Realm used by Oozie and Hadoop. Using 'local.realm' to be aligned with Hadoop configuration
-        </description>
-    </property>
-
-    <property>
         <name>oozie.service.HadoopAccessorService.keytab.file</name>
         <value>${user.home}/oozie.keytab</value>
         <description>
@@ -1133,7 +1125,7 @@
 
     <property>
         <name>oozie.service.HadoopAccessorService.kerberos.principal</name>
-        <value>${user.name}/localhost@${local.realm}</value>
+        <value>${user.name}/localhost@LOCALHOST</value>
         <description>
             Kerberos principal for Oozie service.
         </description>

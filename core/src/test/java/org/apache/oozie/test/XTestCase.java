@@ -17,8 +17,11 @@ package org.apache.oozie.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,6 @@ import javax.persistence.Query;
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -43,6 +45,7 @@ import org.apache.oozie.CoordinatorJobBean;
 import org.apache.oozie.WorkflowActionBean;
 import org.apache.oozie.WorkflowJobBean;
 import org.apache.oozie.service.Services;
+import org.apache.oozie.service.StoreService;
 import org.apache.oozie.service.WorkflowAppService;
 import org.apache.oozie.store.CoordinatorStore;
 import org.apache.oozie.store.StoreException;
@@ -73,55 +76,6 @@ public abstract class XTestCase extends TestCase {
     private String hadoopVersion;
     protected XLog log = new XLog(LogFactory.getLog(getClass()));
 
-    private static final String OOZIE_TEST_PROPERTIES = "oozie.test.properties";
-
-    static {
-        try {
-            // by default uses 'test.properties'
-            String testPropsFile = System.getProperty(OOZIE_TEST_PROPERTIES, "test.properties");
-            File file = new File(testPropsFile);
-            // the testPropsFile is looked at 'oozie-main' project level
-            // this trick here is to work both with Maven (runs the testcases from module directory)
-            // and IDEs (run testcases from 'oozie-main' project directory).
-            if (!file.exists()) {
-                file = new File(file.getAbsoluteFile().getParentFile().getParentFile(), testPropsFile);
-            }
-            if (file.exists()) {
-                System.out.println();
-                System.out.println("*********************************************************************************");
-                System.out.println("Loading test system properties from: " + file.getAbsolutePath());
-                System.out.println();
-                Properties props = new Properties();
-                props.load(new FileReader(file));
-                for (Map.Entry entry : props.entrySet()) {
-                    if (!System.getProperties().containsKey(entry.getKey())) {
-                        System.setProperty((String) entry.getKey(), (String) entry.getValue());
-                        System.out.println(entry.getKey() + " = " + entry.getValue());
-                    }
-                    else {
-                        System.out.println(entry.getKey() + " IGNORED, using command line value = " +
-                                           System.getProperty((String) entry.getKey()));
-                    }
-                }
-                System.out.println("*********************************************************************************");
-                System.out.println();
-            }
-            else {
-                if (System.getProperty(OOZIE_TEST_PROPERTIES) != null) {
-                    System.err.println();
-                    System.err.println("ERROR: Specified test file does not exist: "  +
-                                       System.getProperty(OOZIE_TEST_PROPERTIES));
-                    System.err.println();
-                    System.exit(-1);
-                }
-            }
-        }
-        catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-    }
-
     /**
      * System property to specify the parent directory for the 'oozietests' directory to be used as base for all test
      * working directories. </p> If this property is not set, the assumed value is '/tmp'.
@@ -145,36 +99,6 @@ public abstract class XTestCase extends TestCase {
      * value is "0.20.0"
      */
     public static final String HADOOP_VERSION = "hadoop.version";
-
-    /** 
-     * System property that specifies the user that test oozie instance runs as.
-     * The value of this property defaults to the "${user.name} system property.
-     */
-    public static final String TEST_OOZIE_USER_PROP = "oozie.test.user.oozie";
-
-    /**
-     * System property that specifies the default test user name used by 
-     * the tests. The defalt value of this property is <tt>test</tt>.
-     */
-    public static final String TEST_USER1_PROP = "oozie.test.user.test";
-
-    /**
-     * System property that specifies an auxilliary test user name used by the 
-     * tests. The default value of this property is <tt>test2</tt>.
-     */
-    public static final String TEST_USER2_PROP = "oozie.test.user.test2";
-
-    /**
-     * System property that specifies another auxilliary test user name used by
-     * the tests. The default value of this property is <tt>test3</tt>.
-     */
-    public static final String TEST_USER3_PROP = "oozie.test.user.test3";
-
-    /**
-     * System property that specifies the test groiup used by the tests.
-     * The default value of this property is <tt>testg</tt>.
-     */
-    public static final String TEST_GROUP_PROP = "oozie.test.group";
 
     /**
      * Initialize the test working directory. <p/> If it does not exist it creates it, if it already exists it deletes
@@ -238,19 +162,8 @@ public abstract class XTestCase extends TestCase {
         if (System.getProperty("oozie.test.hadoop.minicluster", "true").equals("true")) {
             setUpEmbeddedHadoop();
         }
-        if (System.getProperty("hadoop20", "false").equals("true")) {
-            System.setProperty("oozie.services.ext", "org.apache.oozie.service.HadoopAccessorService");
-        }
-
-        if (System.getProperty("oozie.test.db", "hsqldb").equals("hsqldb")) {
-            setSystemProperty("oozie.service.StoreService.jdbc.driver", "org.hsqldb.jdbcDriver");
-            setSystemProperty("oozie.service.StoreService.jdbc.url", "jdbc:hsqldb:mem:oozie-db;create=true");
-        }
-        if (System.getProperty("oozie.test.db", "hsqldb").equals("derby")) {
-            delete(new File(baseDir, "oozie-derby"));
-            setSystemProperty("oozie.service.StoreService.jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
-            setSystemProperty("oozie.service.StoreService.jdbc.url", "jdbc:derby:" + baseDir +
-                                                                     "/oozie-derby;create=true");
+        if (System.getProperty("hadoop20", "false").equals("false")) {
+            System.setProperty("oozie.services.ext", "org.apache.oozie.service.KerberosHadoopAccessorService");
         }
     }
 
@@ -288,57 +201,30 @@ public abstract class XTestCase extends TestCase {
         return hadoopVersion;
     }
 
-    /**
-     *  Return the user Id use to run Oozie during the test cases.
-     *
-     * @return Oozie's user Id for running the test cases.
-     */
-    public static String getOozieUser() {
-        return System.getProperty(TEST_OOZIE_USER_PROP, System.getProperty("user.name"));
+    protected String getTestUser() {
+        return "test";
+    }
+
+    protected String getTestUser2() {
+        return "test2";
+    }
+
+    protected String getTestUser3() {
+        return "test3";
     }
 
     /**
-     * Return the defaul test user Id. The user belongs to the test group.
+     * Return the user to use in testcases.
      *
-     * @return the user Id.
+     * @return the user to use in testcases.
      */
-    protected static String getTestUser() {
-        return System.getProperty(TEST_USER1_PROP, "test");
+    protected String getTestGroup() {
+      return "testg";
     }
 
     /**
-     * Return an alternate test user Id that belongs 
-       to the test group.
-     *
-     * @return the user Id.
-     */
-    protected static String getTestUser2() {
-        return System.getProperty(TEST_USER2_PROP, "test2");
-    }
-
-    /**
-     * Return an alternate test user Id that does not belong 
-     * to the test group.
-     *
-     * @return the user Id.
-     */
-    protected static String getTestUser3() {
-        return System.getProperty(TEST_USER3_PROP, "test3");
-    }
-
-    /**
-     * Return the test group.
-     *
-     * @return the test group.
-     */
-    protected static String getTestGroup() {
-        return System.getProperty(TEST_GROUP_PROP, "testg");
-    }
-
-    /**
-     * Return the test working directory. 
-     * <p/> 
-     * It returns <code>${oozie.test.dir}/oozietests/TESTCLASSNAME/TESTMETHODNAME</code>.
+     * Return the test working directory. <p/> It returns <code>${oozie.test.dir}/oozietests/TESTCLASSNAME/TESTMETHODNAME</code>.
+     * <p/>
      *
      * @param testCase testcase instance to obtain the working directory.
      * @return the test working directory.
@@ -410,9 +296,8 @@ public abstract class XTestCase extends TestCase {
     }
 
     /**
-     * Set a system property for the duration of the method test case.
-     * <p/>
-     * After the test method ends the original value is restored.
+     * Set a system property for the duration of the method test case. <p/> After the test method ends the orginal value
+     * is restored.
      *
      * @param name system property name.
      * @param value value to set.
@@ -525,15 +410,15 @@ public abstract class XTestCase extends TestCase {
 
     public String getOoziePrincipal() {
         return System.getProperty("oozie.test.kerberos.oozie.principal",
-                                  getOozieUser() + "/localhost") + "@" + getRealm();
+                                  System.getProperty("user.name") + "/localhost") + "@" + getRealm();
     }
 
     public String getJobTrackerPrincipal() {
-        return System.getProperty("oozie.test.kerberos.jobtracker.principal", "mapred/_HOST") + "@" + getRealm();
+        return System.getProperty("oozie.test.kerberos.jobtracker.principal", "mapred/localhost") + "@" + getRealm();
     }
 
     public String getNamenodePrincipal() {
-        return System.getProperty("oozie.test.kerberos.namenode.principal", "hdfs/_HOST") + "@" + getRealm();
+        return System.getProperty("oozie.test.kerberos.namenode.principal", "hdfs/localhost") + "@" + getRealm();
     }
 
     public <C extends Configuration> C injectKerberosInfo(C conf) {
@@ -631,22 +516,14 @@ public abstract class XTestCase extends TestCase {
             }
             int taskTrackers = 2;
             int dataNodes = 2;
-            String oozieUser = getOozieUser();
             JobConf conf = new JobConf();
             conf.set("dfs.block.access.token.enable", "false");
             conf.set("dfs.permissions", "true");
             conf.set("hadoop.security.authentication", "simple");
-            conf.set("hadoop.proxyuser." + oozieUser + ".hosts", "localhost");
-            conf.set("hadoop.proxyuser." + oozieUser + ".groups", getTestGroup());
+            conf.set("hadoop.proxyuser." + System.getProperty("user.name") + ".hosts", "localhost");
+            conf.set("hadoop.proxyuser." + System.getProperty("user.name") + ".groups", "users");
             conf.set("mapred.tasktracker.map.tasks.maximum", "4");
             conf.set("mapred.tasktracker.reduce.tasks.maximum", "4");
-
-            String [] userGroups = new String[] { getTestGroup() };
-            UserGroupInformation.createUserForTesting(oozieUser, userGroups);
-            UserGroupInformation.createUserForTesting(getTestUser(), userGroups);
-            UserGroupInformation.createUserForTesting(getTestUser2(), userGroups);
-            UserGroupInformation.createUserForTesting(getTestUser3(), new String[] { "users" } );
-
             dfsCluster = new MiniDFSCluster(conf, dataNodes, true, null);
             FileSystem fileSystem = dfsCluster.getFileSystem();
             fileSystem.mkdirs(new Path("/tmp"));
