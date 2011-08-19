@@ -42,6 +42,7 @@ public interface JsonTags {
     public static final String WORKFLOW_RUN = "run";
     public static final String WORKFLOW_CONSOLE_URL = "consoleUrl";
     public static final String WORKFLOW_ACTIONS = "actions";
+    public static final String WORKFLOW_PROGRESS = "progress";
 
     public static final String WORKFLOWS_JOBS = "workflows";
     public static final String WORKFLOWS_TOTAL = "total";
@@ -85,6 +86,7 @@ public interface JsonTags {
     public static final String COORDINATOR_JOB_PAUSE_TIME = "pauseTime";
     public static final String COORDINATOR_JOB_CONSOLE_URL = "consoleUrl";
     public static final String COORDINATOR_JOB_ACTIONS = "actions";
+    public static final String COORDINATOR_JOB_PROGRESS = "progress";
     public static final String COORDINATOR_JOB_USER = "user";
     public static final String COORDINATOR_JOB_GROUP = "group";
     public static final String COORDINATOR_JOB_EXTERNAL_ID = "coordExternalId";
